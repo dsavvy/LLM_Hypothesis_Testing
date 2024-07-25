@@ -1,26 +1,15 @@
 import os
 from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+from openai import OpenAI
 
 # Get the API key from environment variables
+load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
-# Use the API key
-print(api_key)
 
-
-
-
-
-
-
-
-
-
-from openai import OpenAI
+#Set up OpenAI client
 client = OpenAI()
+
 
 completion = client.chat.completions.create(
   model="gpt-4o-mini",
