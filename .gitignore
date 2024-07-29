@@ -12,6 +12,7 @@ Signal_test.py
 Signal_test_GPT.py
 signavio-credentials.txt
 SignavioAuthenticator.py
+pip install openai.py
 __pycache__/
 
 
