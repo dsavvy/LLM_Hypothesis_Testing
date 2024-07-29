@@ -53,7 +53,7 @@ system_instance = 'https://editor.signavio.com'
 tenant_id = '992552b41a33492abf1c3ab47bbe8ed0'
 user_name = 'dominik.sawallisch@sap.com'
 pw = 'sHHABrt5r_s'
-revision_id = 'f21539f694d14dba993047f9cb3bd282'
+revision_id = '1fe7397c17304d3ba4ea41f1eefc97fe'
 
 # Authenticate
 authenticator = SignavioAuthenticator(system_instance, tenant_id, user_name, pw)
@@ -66,8 +66,11 @@ diagram_url = system_instance + '/p/revision'
 
 print(diagram_url)
 
+
 # Fetch and save JSON diagram
-json_request = requests.get(f'{diagram_url}/{revision_id}/json', cookies=cookies, headers=headers)
+json_url = (f'{diagram_url}/{revision_id}/json')
+print(json_url)
+json_request = requests.get(json_url, cookies=cookies, headers=headers)
 print(json_request)
 json_diagram = json_request.content
 path = './diagram.json'

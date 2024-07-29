@@ -1,19 +1,19 @@
+# Access through sap commons llm package
+
 from ipywidgets import widgets
 import json
 import os
-from langchain.schema import HumanMessage
+import requests
 from langchain.prompts import PromptTemplate
 import llm_commons.proxy.base
-from llm_commons.proxy.openai import ChatCompletion
 from llm_commons.proxy.identity import AICoreProxyClient
 from llm_commons.langchain.proxy import ChatOpenAI
-from llm_commons.langchain.proxy import init_embedding_model
 
 # import proxy base module
 import llm_commons.proxy.base
 
 # specify proxy version
-llm_commons.proxy.base.proxy_version = "aicore"
+# llm_commons.proxy.base.proxy_version = "aicore"
 
 # Define Resource Group
 resource_group = widgets.Text(
@@ -22,7 +22,9 @@ resource_group = widgets.Text(
     description='Provide Resource Group assigned by SAP',
     disabled=False
 )
-resource_group
+resource_group,
+
+
 
 # Define LLM Model Options
 llm_model_name = widgets.Dropdown(
@@ -41,18 +43,28 @@ llm_model_name
 
 
 # Define Deployment ID
-deployment_id = widgets.Text(
-    value='d262055d9b56e698', # resource group
-    placeholder='Deployment ID for embedding model',
+#deployment_id = widgets.Text(
+    #value='d262055d9b56e698', # resource group
+    #placeholder='Deployment ID for embedding model',
+    #description='',
+    #disabled=False
+#)
+#deployment_id
+
+llm_deployment_url = widgets.Text(
+    value='https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2/inference/deployments/d33fefb025a601ff', # resource group
+    placeholder='Deployment URL for LLM',
     description='',
     disabled=False
 )
-deployment_id
+
+llm_deployment_url
 
 
 # Secret Key Text File
 with open('irpa-r1156-joint-master-thesi-sk.txt') as f:
     sk = json.load(f)
+
 
 # Configure proxy for AI Core Deployment
 os.environ['AICORE_LLM_AUTH_URL'] = sk['url']+"/oauth/token"
@@ -71,6 +83,9 @@ llm_commons.proxy.client_secret = os.environ['AICORE_LLM_CLIENT_SECRET']
 
 # Instantiate AICoreProxyClient object
 aic_proxy_client = AICoreProxyClient()
+
+aic_proxy_client.deployments
+
 
 aic_proxy_client.add_foundation_model_scenario(
     scenario_id="ies-foundation-models",
