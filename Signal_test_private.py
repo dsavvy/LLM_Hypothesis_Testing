@@ -10,12 +10,7 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
 
-system_instance = 'https://academic.signavio.com'
-tenant_id = '08f05dbc86024c3ca561dafd9d6d1186'
-workspace_id = "08f05dbc86024c3ca561dafd9d6d1186"
-user_name = "dominik.sawallisch@s.wu.ac.at"
-pw = "sHHABrt5r_b"
-revision_id = '807a789a020a4a2493b9fcde041a6bde'
+
 
 authenticator = SignavioAuthenticator.SignavioAuthenticator(system_instance, workspace_id, user_name, pw)
 auth_data = authenticator.authenticate()

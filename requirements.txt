@@ -9,7 +9,6 @@ asttokens==2.4.1
 async-timeout==4.0.3
 attrs==23.2.0
 beautifulsoup4==4.12.3
-bpmnconstraints @ file:///home/domi/Documents/VSC_Github/LLM_Hypothesis_Testing/bpmn2constraints
 bs4==0.0.2
 build==1.2.1
 CacheControl==0.14.0
@@ -109,7 +108,6 @@ regex==2024.7.24
 requests==2.32.3
 requests-toolbelt==1.0.0
 rsa==4.9
-sap-llm-commons @ file:///home/domi/Documents/VSC_Github/LLM_Hypothesis_Testing/sap_llm_commons-0.3.0-py3-none-any.whl#sha256=17a9e059ef89f00a34b1950426469d4eb6895d6bfd905aae96263ac54d495533
 SecretStorage==3.3.3
 shellingham==1.5.4
 six==1.16.0
