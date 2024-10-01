@@ -1,0 +1,22 @@
+# Start your image with a node base image
+FROM python:3.13-rc-bookworm⁠
+# Decision: Use Python, not Ubuntu as I only ne
+
+# Set the working directory.
+WORKDIR /app
+
+# Copy the requirements file and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the app
+COPY PythonApp.py
+COPY signavio-credentials.txt
+COPY sap-llm-credentials.txt
+
+
+# Expose the port that Streamlit will run on
+# EXPOSE 8501
+
+# Command to run the Streamlit app
+# CMD ["streamlit", "run", "PythonApp.py"]
