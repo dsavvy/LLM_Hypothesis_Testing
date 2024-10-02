@@ -25,8 +25,9 @@ def get_llm_auth():
     timeout=8000,
     )
     auth_token = response.json()["access_token"]
+    
     return {
-        'auth_token': auth_token
+        'auth_token': auth_token,
         'resource_group': resource_group
     }
 

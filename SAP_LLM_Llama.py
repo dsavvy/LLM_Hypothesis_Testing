@@ -32,7 +32,6 @@ auth_token = response.json()["access_token"]
 # We use the Open source Llama3 model for our code and specify the address where we access it for inference.
 llm_deployment_url = 'https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2/inference/deployments/d59971ba56763962'
 endpoint = f"{llm_deployment_url}/chat/completions" # endpoint implemented in serving engine
-llm_model_name = 
 
 
 # 2. SPECIFY TEXT INPUT TO LLM.
@@ -46,8 +45,6 @@ test_input = {
         {"content": "Tell me a joke about Generative AI", "role": "user"}
     ]
 }
-
-
 # 3. MAKE REQUEST
 
 # We prepare the HTTP request header using our auth and specify the JSON content type.
@@ -56,6 +53,7 @@ headers = {
     'ai-resource-group': resource_group,
     "Content-Type": "application/json"
 }
+print(headers)
 #Send prepared POST request to the endpoint using the header and input.
 response = requests.post(endpoint, headers=headers, json=test_input)
 
