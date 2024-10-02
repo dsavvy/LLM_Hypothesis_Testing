@@ -30,7 +30,6 @@ def llm_query(llm_message):
     # Extract and print the answer from the JSON response
     if "choices" in response_json and len(response_json["choices"]) > 0:
         answer = response_json["choices"][0]["message"]["content"]
-        print(answer)
     else:
         print("No answer found in the response.")
     # We return the question posted, and the answer by the LLM.    
