@@ -6,6 +6,7 @@ import llm_credentials as cred
 from langchain_core.language_models.llms import LLM
 
 
+
 class SAPLLM(LLM):
     # Here, we explain the the LLM we are using is Llama 3 deployed via the SAP API.
     @property
@@ -35,9 +36,7 @@ class SAPLLM(LLM):
         
         input_data = {
             "model": "meta--llama3-70b-instruct",
-            "messages": [
-                {"content": prompt, "role": "user"}
-            ]
+            "messages": [prompt]
         }
 
         headers = {
