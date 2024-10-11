@@ -1,0 +1,5 @@
+
+"The time it takes to prepare a contract is shorter when the 'review request' activity is followed by the 'prepare contract' activity directly, rather than going through 'calculate terms' or 'assess risks' first."
+
+This hypothesis investigates the impact of different activity sequences on the duration of the 'prepare contract' activity.
+

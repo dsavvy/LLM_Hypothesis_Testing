@@ -6,6 +6,8 @@ from langgraph.checkpoint.memory import MemorySaver
 import llm_langchain_connector as LLM
 from langchain_core.output_parsers import StrOutputParser
 from llm_instruction import llm_query
+from hypotheses_suggestion import suggestHypothesis
+
 # 0. We set up the environment for the App.
 # 0.1 We set up the GUI for the user.
 # 1. We use functions from llm_functions_main to call functions to and from the LLM.
@@ -21,6 +23,9 @@ signal_headers = signal_auth_data['headers']
 
 # 0.1 Initialize LLM: We set up the LLM
 #llm = LLM.SAPLLM()
+
+response = suggestHypothesis()
+print(response)
 
 # 0.2 We initialize LangChain monitoring for the session.
 #LANGCHAIN_TRACING_V2 = True
