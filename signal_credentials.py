@@ -2,16 +2,11 @@ import sys
 import os
 sys.path.append("../")
 import SignavioAuthenticator
-import requests
-from IPython.display import Image, display
 import json
 import logging
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-from PIL import Image as PILImage
-from io import BytesIO
 # Adds directories to Python's module search path  so bpmnconstraints.script can be imported.
 sys.path.append(os.path.abspath("/home/domi/Documents/VSC_Github/LLM_Hypothesis_Testing/bpmn2constraints"))
-from bpmnconstraints.script import compile_bpmn_diagram
 
 # In This file, we use the Authenticator to provide an access token for the SIGNAL API.
 
@@ -37,3 +32,5 @@ def signal_authenticate():
         'cookies': cookies,
         'headers': headers
     }
+
+

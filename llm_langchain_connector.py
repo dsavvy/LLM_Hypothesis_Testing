@@ -38,6 +38,7 @@ class SAPLLM(LLM):
             "model": "meta--llama3-70b-instruct",
             "messages": [prompt]
         }
+        print(input_data)
 
         headers = {
             "Authorization": f"Bearer {auth_token}",
