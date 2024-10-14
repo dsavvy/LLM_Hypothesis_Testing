@@ -23,8 +23,7 @@ def llm_query(sys_mes, user_mes):
             {"content": user_mes, "role": "user"}
             
         ]        
-    }
-    print(input)  
+    } 
     # We prepare the HTTP request header using our auth and specify the JSON content type.
     headers = {
     "Authorization": f"Bearer {auth_token}",

@@ -5,20 +5,20 @@
             "index": 0,
             "logprobs": null,
             "message": {
-                "content": "Here are three hypothesis ideas in natural language based on the provided process mining data:\n\n**Hypothesis 1:**\n\"The time it takes to prepare a contract is shorter when the 'review request' activity is followed by the 'prepare contract' activity directly, rather than going through 'calculate terms' or 'assess risks' first.\"\n\nThis hypothesis investigates the impact of different activity sequences on the duration of the 'prepare contract' activity.\n\n**Hypothesis 2:**\n\"The probability of taking the 'Co-Existence' path (i.e., 'review request' \u2192 'prepare contract' \u2192 'send quote') is higher when the 'standard terms applicable' condition is met, compared to when it is not met.\"\n\nThis hypothesis explores the relationship between a specific process condition ('standard terms applicable') and the likelihood of taking a particular process path.\n\n**Hypothesis 3:**\n\"The average time spent in the 'review request' activity is longer when it is followed by the 'assess risks' activity, compared to when it is followed by the 'calculate terms' or 'prepare contract' activities.\"\n\nThis hypothesis examines the impact of different subsequent activities on the duration of the 'review request' activity.\n\nThese hypotheses can be tested using statistical methods, such as regression analysis, t-tests, or chi-squared tests, to determine whether the data supports or rejects the hypotheses.",
+                "content": "```\nSELECT \n  flow_type, \n  AVG(preparation_time) AS avg_preparation_time\nFROM \n  contracts\nGROUP BY \n  flow_type\nHAVING \n  flow_type IN ('Succession', 'Co-Existence')\nORDER BY \n  avg_preparation_time;\n```",
                 "role": "assistant",
                 "tool_calls": []
             },
             "stop_reason": null
         }
     ],
-    "created": 1728659924,
-    "id": "chat-ee4fc44acc864680ab1f3e9afb168cc5",
+    "created": 1728896389,
+    "id": "chat-104684875b4d4923a4c3669ede320996",
     "model": "meta--llama3-70b-instruct",
     "object": "chat.completion",
     "usage": {
-        "completion_tokens": 280,
-        "prompt_tokens": 1098,
-        "total_tokens": 1378
+        "completion_tokens": 61,
+        "prompt_tokens": 135,
+        "total_tokens": 196
     }
 }

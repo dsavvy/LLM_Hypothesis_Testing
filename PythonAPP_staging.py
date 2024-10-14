@@ -29,8 +29,8 @@ signal_headers = signal_auth_data['headers']
 
 
 # 1. SELECT INITIAL HYPOTHESIS
-#hypothesis = suggestHypothesis()
-#print(hypothesis)
+hypothesis = suggestHypothesis()
+print(hypothesis)
 # End result: Initial Hypothesis selected; Stored under variable "hypothesis" and in file "hypothesis_gen.txt"
 
 
@@ -40,18 +40,18 @@ signal_headers = signal_auth_data['headers']
 # 2.2 We need the structure of the event log - open!
 # 2.3 We probably need to know the specifics of Signal within the system message.
 
-#query = generate_query()
-#print(query)
+query = generate_query()
+print(query)
 
 
 # 3. We execute the query on the event log.
-#PQL_response = execute_query(signal_cookies, signal_headers)
-#print(PQL_response)
+PQL_response = execute_query(signal_cookies, signal_headers)
+print(PQL_response)
 
 
 # 4. We evaluate the query result and transform it back to natural language.
-# PQL_eval = evaluate_query()
-# print(PQL_eval)
+PQL_eval = evaluate_query()
+print(PQL_eval)
 
 
 

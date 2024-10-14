@@ -1,0 +1,13 @@
+```
+SELECT 
+  flow_type, 
+  AVG(preparation_time) AS avg_preparation_time
+FROM 
+  contracts
+GROUP BY 
+  flow_type
+HAVING 
+  flow_type IN ('Succession', 'Co-Existence')
+ORDER BY 
+  avg_preparation_time;
+```
