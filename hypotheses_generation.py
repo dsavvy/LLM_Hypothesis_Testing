@@ -7,6 +7,7 @@ import llm_langchain_connector as LLM
 from langchain_core.output_parsers import StrOutputParser
 from llm_instruction import llm_query
 from hypotheses_suggestion import suggestHypothesis
+import Streamlit_build as app
 
 
 def generate_query():
@@ -19,12 +20,10 @@ def generate_query():
     sys_message_user = sysgen2
     #print(sys_message_gen)
 
-
     query = llm_query(sys_message_gen, sys_message_user)
     query = query['answer']
     query = query.strip()
-    print(query)
-    # hypothesis now contains only the content between Hypothesis 1 and Hypothesis 2
+    app.response("This is the generated query: " + query)
     with open("./hypothesis_query.txt", "w") as file:
        file.write(query)
     

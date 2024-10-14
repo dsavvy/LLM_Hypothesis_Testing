@@ -1,10 +1,19 @@
 ```
 SELECT 
-  AVG(CASE WHEN "review_request" = 1 THEN "contract_preparation_time" ELSE NULL END) AS avg_time_with_review,
-  AVG(CASE WHEN "review_request" = 0 THEN "contract_preparation_time" ELSE NULL END) AS avg_time_without_review
+  outcome, 
+  COUNT(CASE WHEN event_sequence = 'review request -> assess risks -> prepare special terms' THEN 1 ELSE NULL END) AS sequence_count
 FROM 
-  process_data
-WHERE 
-  "contract_preparation_time" IS NOT NULL
-  AND "review_request" IN (0, 1);
+  (
+  SELECT 
+    case_id, 
+    outcome, 
+    LISTAGG(event, ' -> ') WITHIN GROUP (ORDER BY timestamp) OVER (PARTITION BY case_id) AS event_sequence
+  FROM 
+    event_log
+  GROUP BY 
+    case_id, 
+    outcome
+  ) AS sequences
+GROUP BY 
+  outcome;
 ```

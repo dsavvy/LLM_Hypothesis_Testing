@@ -13,6 +13,8 @@ from query_execution import execute_query
 from query_evaluation import evaluate_query
 import streamlit as st
 import Streamlit_build as app
+# USE: streamlit run /home/domi/Documents/VSC_Github/LLM_Hypothesis_Testing/PythonAPP_staging.py
+
 
 
 # 0. We set up the environment for the App.
@@ -32,23 +34,25 @@ app.initialize_streamlit()
 # 1. SELECT INITIAL HYPOTHESIS
 # 1.1 Suggest three Hypotheses for the user to choose from
 hyp_options = suggestHypothesis()
-# 1.2 Let the user select one of the three hypotheses.
-# The user types in 1,2, or 3 to select the hypothesis.
+# 1.2 Let the user select one of the three hypotheses via three buttons.
+hypothesis = None
 hypothesis = choose_hypothesis(hyp_options)
 # End result: Initial Hypothesis selected; Stored under variable "hypothesis" and in file "hypothesis_gen.txt"
 
+if hypothesis:
+    app.response("You selected the hypothesis: " + hypothesis)
+    app.response("Now, let's generate a query to test this hypothesis.")
 
-# 2. We need to generate a valid SIGNAL Query to test the hypothesis.
+# 2. We generate a valid SIGNAL Query to test the hypothesis.
 # requirements for LLM: knowledge of the process, the hypothesis, and the constraints.
-# 2.1 We need the generated hypothesis = hypothesis
 # 2.2 We need the structure of the event log - open!
 # 2.3 We probably need to know the specifics of Signal within the system message.
 
-#query = generate_query()
-#print(query)
+query = generate_query()
 
-#with open("./session_output.txt", "a") as file:
-#    file.write(f"{hypothesis}\n{query}\n")
+
+with open("./session_output.txt", "a") as file:
+    file.write(f"{hypothesis}\n{query}\n")
 
 
 # 3. We execute the query on the event log.

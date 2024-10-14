@@ -35,7 +35,7 @@ def suggestHypothesis():
 
     # 1.4 Build first LLM system message
     sysgen1 = "We are conducting statistical hypothesis testing as part of Process Mining. Your task is to generate three SQL querys. Next, you will find the declare constraints"
-    sys_message_user = "Build three hypotheses ideas in natural language we can use to investigate the process."
+    sys_message_user = "I am building three hypotheses ideas in natural language we can use to investigate the process."
     sys_message_gen = f"{sysgen1}{declare_constraints_str}"
     # We print the query to the chat window for the user to see
     app.query(sys_message_user)
@@ -65,7 +65,7 @@ def choose_hypothesis(options):
         st.session_state.messages.append({"role": "user", "content": "You selected hypothesis 3"})
         hypothesis = options.split("**Hypothesis 3:**")[1]
     else:
-        print("Invalid input. Please type in 1, 2, or 3.")
+        print("Invalid input. Please select hypothesis 1, 2, or 3 by the respective button.")
         hypothesis = "Error: No hypothesis selected."
     file_path = "./hypothesis_gen.txt"
     with open(file_path, "w") as file:
