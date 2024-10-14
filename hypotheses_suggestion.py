@@ -6,24 +6,17 @@ from langgraph.checkpoint.memory import MemorySaver
 import llm_langchain_connector as LLM
 from langchain_core.output_parsers import StrOutputParser
 from llm_instruction import llm_query
+import streamlit as st
+import Streamlit_build as app
 
 
 
 def suggestHypothesis():
-    # 0: SETTING UP THE ENVIRONMENT
-    # 0.1 Initialize Signavio:
-    #   We authenticate with Signavio and assign the cookies, and headers.
-    signal_auth_data = signal.signal_authenticate()
-    signal_cookies = signal_auth_data['cookies']
-    signal_headers = signal_auth_data['headers']
-
-
-
     # 1: SELECT INITIAL HYPOTHESIS
     ##ideas =  f.generate_ideas(signal_cookies, signal_headers, llm)
     ##print(ideas)
     # 1.1: Generate DECLARE CONSTRAINTS
-    declare_constraints = func.generate_constraints(signal_cookies, signal_headers)
+    declare_constraints = func.generate_constraints()
     declare_constraints_str = "\n".join(declare_constraints)
     declare_constraints_str = declare_constraints_str.replace("[", " ").replace("]", " ").replace("(", " ").replace(")", " ").replace("\n", " ")
     file_path = "./process_declare_constraints.txt"
@@ -42,21 +35,39 @@ def suggestHypothesis():
 
     # 1.4 Build first LLM system message
     sysgen1 = "We are conducting statistical hypothesis testing as part of Process Mining. Your task is to generate three SQL querys. Next, you will find the declare constraints"
-    sysgen2 = "Build three hypotheses ideas in natural language we can use to investigate the process."
+    sys_message_user = "Build three hypotheses ideas in natural language we can use to investigate the process."
     sys_message_gen = f"{sysgen1}{declare_constraints_str}"
-    sys_message_user = sysgen2
-    #print(sys_message_gen)
-
-
+    # We print the query to the chat window for the user to see
+    app.query(sys_message_user)
+    # 1.5 Query the LLM with the system message and the user message
     answer = llm_query(sys_message_gen, sys_message_user)
     answer = answer['answer']
+    app.response(answer)
+    with open("./hypothesis_options.txt", "w") as file:
+       file.write(answer)
+    return answer
 
-    # For now, We just select the first hypothesis that it provides
-    hypothesis = answer.split("**Hypothesis 1:**")[1].split("**Hypothesis 2:**")[0]
-    # hypothesis now contains only the content between Hypothesis 1 and Hypothesis 2
-    print(hypothesis)
+
+def choose_hypothesis(options):
+    if st.button("Select Hypothesis 1", key="hyp_1"):
+        with st.chat_message("user"):
+            st.markdown("You selected hypothesis 1")
+        st.session_state.messages.append({"role": "user", "content": "You selected hypothesis 1"})    
+        hypothesis = options.split("**Hypothesis 1:**")[1].split("**Hypothesis 2:**")[0]
+    elif st.button("Select Hypothesis 2", key="hyp_2"):
+        with st.chat_message("user"):
+            st.markdown("You selected hypothesis 2")
+        st.session_state.messages.append({"role": "user", "content": "You selected hypothesis 2"})
+        hypothesis = options.split("**Hypothesis 2:**")[1].split("**Hypothesis 3:**")[0]
+    elif st.button("Select Hypothesis 3", key="hyp_3"):
+        with st.chat_message("user"):
+            st.markdown("You selected hypothesis 3")
+        st.session_state.messages.append({"role": "user", "content": "You selected hypothesis 3"})
+        hypothesis = options.split("**Hypothesis 3:**")[1]
+    else:
+        print("Invalid input. Please type in 1, 2, or 3.")
+        hypothesis = "Error: No hypothesis selected."
     file_path = "./hypothesis_gen.txt"
     with open(file_path, "w") as file:
         file.write(hypothesis)
-    
-    return  hypothesis    
+    return hypothesis

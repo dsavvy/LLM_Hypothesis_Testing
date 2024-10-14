@@ -1,13 +1,10 @@
 ```
 SELECT 
-  flow_type, 
-  AVG(preparation_time) AS avg_preparation_time
+  AVG(CASE WHEN "review_request" = 1 THEN "contract_preparation_time" ELSE NULL END) AS avg_time_with_review,
+  AVG(CASE WHEN "review_request" = 0 THEN "contract_preparation_time" ELSE NULL END) AS avg_time_without_review
 FROM 
-  contracts
-GROUP BY 
-  flow_type
-HAVING 
-  flow_type IN ('Succession', 'Co-Existence')
-ORDER BY 
-  avg_preparation_time;
+  process_data
+WHERE 
+  "contract_preparation_time" IS NOT NULL
+  AND "review_request" IN (0, 1);
 ```

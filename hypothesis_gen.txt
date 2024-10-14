@@ -1,4 +1,1 @@
- "The time taken to prepare a contract is shorter when the 'Succession' flow is followed compared to the 'Co-Existence' flow."
-
-This hypothesis suggests that the succession flow, which involves a sequential execution of tasks, is more efficient in terms of time taken to prepare a contract compared to the co-existence flow, which involves parallel execution of tasks.
-
+Error: No hypothesis selected.

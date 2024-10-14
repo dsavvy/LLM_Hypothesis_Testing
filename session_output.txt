@@ -1,0 +1,15 @@
+ "The presence of a 'review request' activity in the process flow leads to a significant increase in the time taken to prepare a contract."
+
+This hypothesis suggests that when a review request is triggered in the process, it adds a layer of complexity that delays the preparation of the contract. By investigating this hypothesis, we can determine if there is a statistically significant correlation between the presence of a review request and the contract preparation time.
+
+
+```
+SELECT 
+  AVG(CASE WHEN "review_request" = 1 THEN "contract_preparation_time" ELSE NULL END) AS avg_time_with_review,
+  AVG(CASE WHEN "review_request" = 0 THEN "contract_preparation_time" ELSE NULL END) AS avg_time_without_review
+FROM 
+  process_data
+WHERE 
+  "contract_preparation_time" IS NOT NULL
+  AND "review_request" IN (0, 1);
+```

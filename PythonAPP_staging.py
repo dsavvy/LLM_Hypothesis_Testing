@@ -7,11 +7,12 @@ from langgraph.checkpoint.memory import MemorySaver
 import llm_langchain_connector as LLM
 from langchain_core.output_parsers import StrOutputParser
 from llm_instruction import llm_query
-from hypotheses_suggestion import suggestHypothesis
+from hypotheses_suggestion import suggestHypothesis, choose_hypothesis
 from hypotheses_generation import generate_query
 from query_execution import execute_query
 from query_evaluation import evaluate_query
-
+import streamlit as st
+import Streamlit_build as app
 
 
 # 0. We set up the environment for the App.
@@ -27,10 +28,13 @@ signal_auth_data = signal.signal_authenticate()
 signal_cookies = signal_auth_data['cookies']
 signal_headers = signal_auth_data['headers']
 
-
+app.initialize_streamlit()
 # 1. SELECT INITIAL HYPOTHESIS
-hypothesis = suggestHypothesis()
-print(hypothesis)
+# 1.1 Suggest three Hypotheses for the user to choose from
+hyp_options = suggestHypothesis()
+# 1.2 Let the user select one of the three hypotheses.
+# The user types in 1,2, or 3 to select the hypothesis.
+hypothesis = choose_hypothesis(hyp_options)
 # End result: Initial Hypothesis selected; Stored under variable "hypothesis" and in file "hypothesis_gen.txt"
 
 
@@ -40,18 +44,26 @@ print(hypothesis)
 # 2.2 We need the structure of the event log - open!
 # 2.3 We probably need to know the specifics of Signal within the system message.
 
-query = generate_query()
-print(query)
+#query = generate_query()
+#print(query)
+
+#with open("./session_output.txt", "a") as file:
+#    file.write(f"{hypothesis}\n{query}\n")
 
 
 # 3. We execute the query on the event log.
-PQL_response = execute_query(signal_cookies, signal_headers)
-print(PQL_response)
+#PQL_response = execute_query(signal_cookies, signal_headers)
+#print(PQL_response)
 
 
 # 4. We evaluate the query result and transform it back to natural language.
-PQL_eval = evaluate_query()
-print(PQL_eval)
+#PQL_eval = evaluate_query()
+#print(PQL_eval)
+
+# Save all of the results to my text file.
+#with open("./session_output.txt", "a") as file:
+#    file.write(f"{hypothesis}\n{query}\n{PQL_response}\n{PQL_eval}\n")
+
 
 
 

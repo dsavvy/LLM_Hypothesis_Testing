@@ -52,7 +52,7 @@ def generate_ideas(cookies, headers, llm):
     
     return ideas
 
-def generate_constraints(cookies, headers):
+def generate_constraints():
     path = './diagram.json'
     declare_constraints = compile_bpmn_diagram(path, "DECLARE", False)
     return declare_constraints

@@ -11,11 +11,15 @@ from hypotheses_suggestion import suggestHypothesis
 from hypotheses_generation import generate_query
 from query_execution import execute_query
 from query_evaluation import evaluate_query
-
+import streamlit as st
+import Streamlit_build as app
 
 
 # 0. We set up the environment for the App.
-# 0.1 We set up the GUI for the user.
+# 0.1 We set up the GUI for the user using Streamlit.
+app.initialize_streamlit()
+
+
 # 1. We use functions from llm_functions_main to call functions to and from the LLM.
 # 2. We use functions from signavio_functions_main to call functions to and from the Signavio API.
 # 3. We use both to create the process/program flow depicted in the Process Manager.
