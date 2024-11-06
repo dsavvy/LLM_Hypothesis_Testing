@@ -1,19 +1,13 @@
 ```
 SELECT 
-  outcome, 
-  COUNT(CASE WHEN event_sequence = 'review request -> assess risks -> prepare special terms' THEN 1 ELSE NULL END) AS sequence_count
+  path, 
+  COUNT(CASE WHEN activity = LAG(activity) OVER (PARTITION BY case_id ORDER BY timestamp) THEN 1 ELSE NULL END) AS loopback_count
 FROM 
-  (
-  SELECT 
-    case_id, 
-    outcome, 
-    LISTAGG(event, ' -> ') WITHIN GROUP (ORDER BY timestamp) OVER (PARTITION BY case_id) AS event_sequence
-  FROM 
-    event_log
-  GROUP BY 
-    case_id, 
-    outcome
-  ) AS sequences
+  event_log
 GROUP BY 
-  outcome;
+  path
+HAVING 
+  path IN ('Precedence', 'Alternate Precedence')
+ORDER BY 
+  loopback_count DESC;
 ```

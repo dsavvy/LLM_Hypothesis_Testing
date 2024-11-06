@@ -7,7 +7,7 @@ from langgraph.checkpoint.memory import MemorySaver
 import llm_langchain_connector as LLM
 from langchain_core.output_parsers import StrOutputParser
 from llm_instruction import llm_query
-from hypotheses_suggestion import suggestHypothesis, choose_hypothesis
+from hypotheses_suggestion import showProcess, suggestHypothesis, choose_hypothesis
 from hypotheses_generation import generate_query
 from query_execution import execute_query
 from query_evaluation import evaluate_query
@@ -30,18 +30,24 @@ signal_auth_data = signal.signal_authenticate()
 signal_cookies = signal_auth_data['cookies']
 signal_headers = signal_auth_data['headers']
 
+# We initialize Streamlit and show a welcome message. 
 app.initialize_streamlit()
+app.response("Welcome to our prototype! I am your LLM assistant and will help you to conduct statistical hypothesis tests to learn more about your process. Let us start mining!")
 # 1. SELECT INITIAL HYPOTHESIS
+# 1.0 We show the user the most common process flow.
+graph = showProcess(signal_cookies, signal_headers)
 # 1.1 Suggest three Hypotheses for the user to choose from
+
+
 hyp_options = suggestHypothesis()
 # 1.2 Let the user select one of the three hypotheses via three buttons.
-hypothesis = None
 hypothesis = choose_hypothesis(hyp_options)
 # End result: Initial Hypothesis selected; Stored under variable "hypothesis" and in file "hypothesis_gen.txt"
 
-if hypothesis:
+# Only start this, once we have populated the hypothesis.
+if isinstance(hypothesis, str):
     app.response("You selected the hypothesis: " + hypothesis)
-    app.response("Now, let's generate a query to test this hypothesis.")
+    app.response("Now, the agent generates a query to test this hypothesis.")
 
 # 2. We generate a valid SIGNAL Query to test the hypothesis.
 # requirements for LLM: knowledge of the process, the hypothesis, and the constraints.
@@ -49,7 +55,7 @@ if hypothesis:
 # 2.3 We probably need to know the specifics of Signal within the system message.
 
 query = generate_query()
-
+# This outputs a response with the query in the app.
 
 with open("./session_output.txt", "a") as file:
     file.write(f"{hypothesis}\n{query}\n")

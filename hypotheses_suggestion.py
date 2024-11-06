@@ -8,6 +8,31 @@ from langchain_core.output_parsers import StrOutputParser
 from llm_instruction import llm_query
 import streamlit as st
 import Streamlit_build as app
+from PIL import Image as PILImage
+from io import BytesIO
+import requests
+import json
+
+def showProcess(cookies, headers):
+    with open('signavio-credentials.txt') as f:
+        sk = json.load(f)
+    #Define variables needed for API access from the .txt's JSON.
+    system_instance = sk["system_instance"]
+    revision_id = "1fe7397c17304d3ba4ea41f1eefc97fe"
+    diagram_url = system_instance + '/p/revision'
+    png_request = requests.get(
+    f'{diagram_url}/{revision_id}/png',
+    cookies=cookies,
+    headers=headers)
+    print(png_request)
+    image = PILImage.open(BytesIO(png_request.content))
+    # Save the .png file to the current directory.
+    png_path = './graph.png'
+    with open(png_path, 'wb') as f:
+        f.write(png_request.content)
+    st.image(image, caption="Process Diagram of the most common process flow within your event log.")
+    return image
+    
 
 
 
@@ -38,7 +63,7 @@ def suggestHypothesis():
     sys_message_user = "I am building three hypotheses ideas in natural language we can use to investigate the process."
     sys_message_gen = f"{sysgen1}{declare_constraints_str}"
     # We print the query to the chat window for the user to see
-    app.query(sys_message_user)
+    app.response(sys_message_user)
     # 1.5 Query the LLM with the system message and the user message
     answer = llm_query(sys_message_gen, sys_message_user)
     answer = answer['answer']

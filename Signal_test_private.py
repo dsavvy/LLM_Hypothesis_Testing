@@ -42,7 +42,10 @@ headers = {'Accept': 'application/json', 'x-signavio-id':  auth_data['auth_token
 # This is the revision ID that determines which process we access. We acquire it through website inspection via web developer tools.
 revision_id = "1fe7397c17304d3ba4ea41f1eefc97fe"
 # Request the BPMN diagram metadata for that revision_id.
-diagram_url = system_instance + '/p/revision'
+
+
+
+
 print(diagram_url)
 json_request = requests.get(
     f'{diagram_url}/{revision_id}/json',
@@ -85,7 +88,7 @@ def signal_template(constraint):
 signal_endpoint = system_instance + '/g/api/pi-graphql/signal'
 constraint_violations = {}
 for constraint in signal_constraints:
-    query_request = requests.post(
+    query_request about:blank#blocked= requests.post(
         signal_endpoint,
         cookies=cookies,
         headers=headers,

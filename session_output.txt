@@ -42,3 +42,71 @@ FROM
 GROUP BY 
   outcome;
 ```
+Error: No hypothesis selected.
+SELECT COUNT(*) 
+FROM process_instances 
+WHERE NOT (status = 'completed' AND error_code IS NULL);
+Error: No hypothesis selected.
+SELECT COUNT(*) 
+FROM event_log 
+WHERE event_type = 'Error';
+
+"Cases that follow the 'Succession' path tend to have a shorter cycle time compared to cases that follow the 'Co-Existence' path."
+
+This hypothesis investigates whether the succession path, which involves a more linear sequence of activities, results in faster processing times compared to the co-existence path, which involves more concurrent activities.
+
+
+```
+SELECT 
+  path, 
+  AVG(cycle_time) AS avg_cycle_time
+FROM 
+  (
+  SELECT 
+    CASE 
+      WHEN EXISTS (
+        SELECT 1 
+        FROM activities a2 
+        WHERE a2.case_id = a.case_id 
+        AND a2.activity_name = 'Activity_B' 
+        AND a2.timestamp > a.timestamp
+      ) THEN 'Co-Existence' 
+      ELSE 'Succession' 
+    END AS path, 
+    TIMESTAMPDIFF(SECOND, MIN(timestamp), MAX(timestamp)) AS cycle_time
+  FROM 
+    activities a
+  GROUP BY 
+    a.case_id
+  ) AS subquery
+GROUP BY 
+  path;
+```
+Error: No hypothesis selected.
+SELECT *
+FROM process_instances
+WHERE error_occurred = 'TRUE';
+Error: No hypothesis selected.
+SELECT 
+    COUNT(*) AS error_count
+FROM 
+    process_instances
+WHERE 
+    NOT (status = 'completed' AND outcome = 'success');
+ 
+"The 'Precedence' path, which involves assessing risks, preparing special terms, and calculating terms, has a higher frequency of loopbacks (i.e., revisiting previous activities) compared to the 'Alternate Precedence' path, indicating potential inefficiencies in the risk assessment process."
+
+
+```
+SELECT 
+  path, 
+  COUNT(CASE WHEN activity = LAG(activity) OVER (PARTITION BY case_id ORDER BY timestamp) THEN 1 ELSE NULL END) AS loopback_count
+FROM 
+  event_log
+GROUP BY 
+  path
+HAVING 
+  path IN ('Precedence', 'Alternate Precedence')
+ORDER BY 
+  loopback_count DESC;
+```

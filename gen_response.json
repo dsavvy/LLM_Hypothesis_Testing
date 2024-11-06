@@ -5,20 +5,20 @@
             "index": 0,
             "logprobs": null,
             "message": {
-                "content": "```\nSELECT \n  outcome, \n  COUNT(CASE WHEN event_sequence = 'review request -> assess risks -> prepare special terms' THEN 1 ELSE NULL END) AS sequence_count\nFROM \n  (\n  SELECT \n    case_id, \n    outcome, \n    LISTAGG(event, ' -> ') WITHIN GROUP (ORDER BY timestamp) OVER (PARTITION BY case_id) AS event_sequence\n  FROM \n    event_log\n  GROUP BY \n    case_id, \n    outcome\n  ) AS sequences\nGROUP BY \n  outcome;\n```",
+                "content": "```\nSELECT \n  path, \n  COUNT(CASE WHEN activity = LAG(activity) OVER (PARTITION BY case_id ORDER BY timestamp) THEN 1 ELSE NULL END) AS loopback_count\nFROM \n  event_log\nGROUP BY \n  path\nHAVING \n  path IN ('Precedence', 'Alternate Precedence')\nORDER BY \n  loopback_count DESC;\n```",
                 "role": "assistant",
                 "tool_calls": []
             },
             "stop_reason": null
         }
     ],
-    "created": 1728911996,
-    "id": "chat-4d7ff6a422684acfbc34ab5d85f004f6",
+    "created": 1730293071,
+    "id": "chat-f34203146b57485f85e32679932c77d9",
     "model": "meta--llama3-70b-instruct",
     "object": "chat.completion",
     "usage": {
-        "completion_tokens": 115,
-        "prompt_tokens": 149,
-        "total_tokens": 264
+        "completion_tokens": 82,
+        "prompt_tokens": 120,
+        "total_tokens": 202
     }
 }

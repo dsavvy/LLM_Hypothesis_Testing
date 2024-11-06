@@ -57,6 +57,9 @@ def generate_constraints():
     declare_constraints = compile_bpmn_diagram(path, "DECLARE", False)
     return declare_constraints
 
+def generate_png():
+    path = './graph.png'
+    
 
 def signal_query(cookies, headers):
     cookies = cookies

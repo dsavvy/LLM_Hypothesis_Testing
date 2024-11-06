@@ -10,6 +10,7 @@ from hypotheses_suggestion import suggestHypothesis
 from hypotheses_generation import generate_query
 import requests
 import json
+import Streamlit_build as app
 
 
 def execute_query(cookies, headers):
@@ -25,7 +26,8 @@ def execute_query(cookies, headers):
         headers=headers,
         json={'query': query})
     response = request.json()['data'][0][0]
-    response_str = str(response) 
+    response_str = str(response)
+    app.response(response_str) 
     with open("./hypothesis_exec.txt", "w") as file:
        file.write(response_str)
     return response
