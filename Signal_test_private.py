@@ -88,7 +88,7 @@ def signal_template(constraint):
 signal_endpoint = system_instance + '/g/api/pi-graphql/signal'
 constraint_violations = {}
 for constraint in signal_constraints:
-    query_request about:blank#blocked= requests.post(
+    query_request = requests.post(
         signal_endpoint,
         cookies=cookies,
         headers=headers,
