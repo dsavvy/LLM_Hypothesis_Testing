@@ -1,13 +1,8 @@
-```
+```sql
 SELECT 
-  path, 
-  COUNT(CASE WHEN activity = LAG(activity) OVER (PARTITION BY case_id ORDER BY timestamp) THEN 1 ELSE NULL END) AS loopback_count
+    (AVG(CASE WHEN Activity = 'Assess risks' THEN END_TIME END) - AVG(CASE WHEN Activity = 'Calculate terms' THEN END_TIME END)) AS time_difference
 FROM 
-  event_log
-GROUP BY 
-  path
-HAVING 
-  path IN ('Precedence', 'Alternate Precedence')
-ORDER BY 
-  loopback_count DESC;
+    "defaultview-4"
+WHERE 
+    Activity IN ('Assess risks', 'Calculate terms')
 ```

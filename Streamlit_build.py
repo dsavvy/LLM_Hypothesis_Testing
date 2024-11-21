@@ -7,7 +7,9 @@ def initialize_streamlit():
     # Define title of the app
     st.title("PM Hypothesis Testing App")
     # Set up an empty session state / chat history.
-    st.session_state.messages = []
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    print("Streamlit initialized!")
     # React to user input
 
     

@@ -5,20 +5,20 @@
             "index": 0,
             "logprobs": null,
             "message": {
-                "content": "```\nSELECT \n  path, \n  COUNT(CASE WHEN activity = LAG(activity) OVER (PARTITION BY case_id ORDER BY timestamp) THEN 1 ELSE NULL END) AS loopback_count\nFROM \n  event_log\nGROUP BY \n  path\nHAVING \n  path IN ('Precedence', 'Alternate Precedence')\nORDER BY \n  loopback_count DESC;\n```",
+                "content": "```sql\nSELECT \n    (AVG(CASE WHEN Activity = 'Assess risks' THEN END_TIME END) - AVG(CASE WHEN Activity = 'Calculate terms' THEN END_TIME END)) AS time_difference\nFROM \n    \"defaultview-4\"\nWHERE \n    Activity IN ('Assess risks', 'Calculate terms')\n```",
                 "role": "assistant",
                 "tool_calls": []
             },
             "stop_reason": null
         }
     ],
-    "created": 1730293071,
-    "id": "chat-f34203146b57485f85e32679932c77d9",
-    "model": "meta--llama3-70b-instruct",
+    "created": 1732185961,
+    "id": "chat-d87c2f3dd12d4b30a91a4179899be1c1",
+    "model": "meta--llama3.1-70b-instruct",
     "object": "chat.completion",
     "usage": {
-        "completion_tokens": 82,
-        "prompt_tokens": 120,
-        "total_tokens": 202
+        "completion_tokens": 69,
+        "prompt_tokens": 216,
+        "total_tokens": 285
     }
 }

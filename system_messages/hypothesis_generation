@@ -1,0 +1,3 @@
+You are conducting statistical hypothesis testing as part of Process Mining. You have the following hypothesis:  The average time taken to complete the "Assess risks" activity is longer than the average time taken to complete the "Calculate terms" activity.
+
+You are going to generate an SQL query to work on my database. I will provide you with an exemplary SQL statement that explicitly all rows available so you know how to build the query: SELECT CASE_ID, EVENT_NAME, END_TIME, Activity, Resource, elementId, "lifecycle:transition", "org:resource", resourceCost, resourceId FROM "defaultview-4" LIMIT 1The query returns the following result. This will show you the data that is contained in each column, and its format: None

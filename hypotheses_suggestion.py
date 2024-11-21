@@ -12,6 +12,8 @@ from PIL import Image as PILImage
 from io import BytesIO
 import requests
 import json
+from diagram_generateDFG import GenTextualAbstraction
+import signal_queries as signal
 
 def showProcess(cookies, headers):
     with open('signavio-credentials.txt') as f:
@@ -32,38 +34,44 @@ def showProcess(cookies, headers):
         f.write(png_request.content)
     st.image(image, caption="Process Diagram of the most common process flow within your event log.")
     return image
-    
-
 
 
 def suggestHypothesis():
     # 1: SELECT INITIAL HYPOTHESIS
     ##ideas =  f.generate_ideas(signal_cookies, signal_headers, llm)
     ##print(ideas)
-    # 1.1: Generate DECLARE CONSTRAINTS
-    declare_constraints = func.generate_constraints()
-    declare_constraints_str = "\n".join(declare_constraints)
-    declare_constraints_str = declare_constraints_str.replace("[", " ").replace("]", " ").replace("(", " ").replace(")", " ").replace("\n", " ")
-    file_path = "./process_declare_constraints.txt"
-    with open(file_path, "w") as file:
-        file.write(declare_constraints_str)
+    # 1.1: Generate DECLARE CONSTRAINTS: CONFUSED LLM; DEPRECATED FOR NOW
+    #declare_constraints = func.generate_constraints()
+    #declare_constraints_str = "\n".join(declare_constraints)
+    #declare_constraints_str = declare_constraints_str.replace("[", " ").replace("]", " ").replace("(", " ").replace(")", " ").replace("\n", " ")
+    #file_path = "./process_declare_constraints.txt"
+    #with open(file_path, "w") as file:
+    #    file.write(declare_constraints_str)
 
     ##result = f.signal_query(signal_cookies, signal_headers)
     ##print(result)
 
 
-    # 1.2: Generate DFG graph - To-Do / question!
-    # To-Do! / Ask Timotheus!
+    # 1.2: Generate DFG graph - Textual Abstraction
+    DFG_relation = GenTextualAbstraction()
 
     # 1.3 Retrieve 1 line from the event log
-    # To-Do! / Ask Timotheus!
+    signal_eventlog_query="SELECT CASE_ID, EVENT_NAME, END_TIME, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM \"defaultview-4\" LIMIT 1"
+    event_log_exc = signal.query_signal(signal_eventlog_query)
 
     # 1.4 Build first LLM system message
-    sysgen1 = "We are conducting statistical hypothesis testing as part of Process Mining. Your task is to generate three SQL querys. Next, you will find the declare constraints"
-    sys_message_user = "I am building three hypotheses ideas in natural language we can use to investigate the process."
-    sys_message_gen = f"{sysgen1}{declare_constraints_str}"
-    # We print the query to the chat window for the user to see
+    sysgenDFG = "We are conducting statistical hypothesis testing as part of Process Mining. 'Your task is to generate three hypotheses, and then SQL querys. Next, you will find the textual abstraction of the directly follows relations in the process: "
+    sys_message_gen = f"{sysgenDFG}{DFG_relation}"
+    sysgenlog = " Furthermore, you must consider the data format. This is an example query that includes all columns of the event log: "
+    sys_message_gen=f"{sys_message_gen}{sysgenlog}{signal_eventlog_query}"
+    sysgenlog2 = "This is the result of this query showing all columns of the event log: "
+    sysgen1 = "Now, create three hypothesis in natural language based on the data provided. Try to make the hypotheses as simple and specific as possible so we can convert them into simple, directly executable SQL queries later."
+    sys_message_gen=f"{sys_message_gen}{sysgenlog2}{event_log_exc}{sysgen1}"
+    print(sys_message_gen)
+    sys_message_user = "I am building three hypotheses ideas in natural language we can use to investigate the described process."
     app.response(sys_message_user)
+    # We print the query to the chat window for the user to see
+    
     # 1.5 Query the LLM with the system message and the user message
     answer = llm_query(sys_message_gen, sys_message_user)
     answer = answer['answer']

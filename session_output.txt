@@ -110,3 +110,191 @@ HAVING
 ORDER BY 
   loopback_count DESC;
 ```
+Error: No hypothesis selected.
+SELECT * FROM process_instance_table WHERE error_flag = 'TRUE';
+ "The process takes longer to complete when the prepare special terms activity is involved, compared to when it's not involved."
+
+This hypothesis explores the impact of the prepare special terms activity on the overall process duration. You can use SQL queries to calculate the process duration with and without this activity and perform a statistical test to determine if the difference is significant.
+
+
+```
+WITH 
+  with_special_terms AS (
+    SELECT 
+      AVG(duration) AS avg_duration
+    FROM 
+      (
+        SELECT 
+          CASE 
+            WHEN "prepare special terms" IN (activity) THEN TIMESTAMPDIFF(SECOND, start_time, end_time)
+            ELSE NULL
+          END AS duration
+        FROM 
+          process_table
+      ) AS subquery
+    WHERE 
+      duration IS NOT NULL
+  ),
+  
+  without_special_terms AS (
+    SELECT 
+      AVG(duration) AS avg_duration
+    FROM 
+      (
+        SELECT 
+          CASE 
+            WHEN "prepare special terms" NOT IN (activity) THEN TIMESTAMPDIFF(SECOND, start_time, end_time)
+            ELSE NULL
+          END AS duration
+        FROM 
+          process_table
+      ) AS subquery
+    WHERE 
+      duration IS NOT NULL
+  )
+
+SELECT 
+  with_special_terms.avg_duration, 
+  without_special_terms.avg_duration
+FROM 
+  with_special_terms, 
+  without_special_terms;
+```
+Error: No hypothesis selected.
+SELECT COUNT(*) 
+FROM event_log 
+WHERE error = 'true';
+Error: No hypothesis selected.
+SELECT COUNT(*) 
+FROM process_instance 
+WHERE error_occurred = 1
+ "The time taken to calculate terms is significantly longer when the risk assessment is also being performed in parallel, compared to when the risk assessment is not being performed."
+
+This hypothesis can be investigated by analyzing the time difference between the "Calculate terms" event and the next event in the process, comparing cases where the "Assess risks" event is also being performed in parallel versus cases where it is not.
+
+
+```sql
+WITH calculate_terms AS (
+  SELECT 
+    case_id,
+    MIN(CASE WHEN activity = 'Calculate terms' THEN timestamp END) AS calculate_terms_start,
+    MIN(CASE WHEN activity != 'Calculate terms' THEN timestamp END) AS next_event_start
+  FROM 
+    event_log
+  GROUP BY 
+    case_id
+),
+assess_risks AS (
+  SELECT 
+    case_id,
+    MIN(timestamp) AS assess_risks_start
+  FROM 
+    event_log
+  WHERE 
+    activity = 'Assess risks'
+  GROUP BY 
+    case_id
+),
+parallel_assess AS (
+  SELECT 
+    ct.case_id,
+    ct.calculate_terms_start,
+    ct.next_event_start,
+    ar.assess_risks_start
+  FROM 
+    calculate_terms ct
+  LEFT JOIN 
+    assess_risks ar ON ct.case_id = ar.case_id
+  WHERE 
+    ar.assess_risks_start IS NOT NULL AND ar.assess_risks_start <= ct.next_event_start
+),
+non_parallel_assess AS (
+  SELECT 
+    ct.case_id,
+    ct.calculate_terms_start,
+    ct.next_event_start,
+    NULL AS assess_risks_start
+  FROM 
+    calculate_terms ct
+  LEFT JOIN 
+    assess_risks ar ON ct.case_id = ar.case_id
+  WHERE 
+    ar.assess_risks_start IS NULL OR ar.assess_risks_start > ct.next_event_start
+)
+SELECT 
+  'parallel' AS group_name,
+  AVG(next_event_start - calculate_terms_start) AS avg_time_diff
+FROM 
+  parallel_assess
+UNION ALL
+SELECT 
+  'non-parallel' AS group_name,
+  AVG(next_event_start - calculate_terms_start) AS avg_time_diff
+FROM 
+  non_parallel_assess;
+```
+Error: No hypothesis selected.
+SELECT COUNT(CASE_ID) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete' AND "org:resource" = 'Employee_A' AND END_TIME > '2022-01-01'
+ "The time taken to complete the 'Assess risks' task is significantly longer than the time taken to complete the 'Calculate terms' task."
+
+This hypothesis can be investigated by analyzing the event log data to compare the average duration of the 'Assess risks' and 'Calculate terms' tasks.
+
+
+```sql
+WITH Assess_risks AS (
+  SELECT 
+    AVG(END_TIME - LAG(END_TIME) OVER (PARTITION BY CASE_ID ORDER BY END_TIME)) AS avg_duration
+  FROM 
+    "defaultview-4"
+  WHERE 
+    Activity = 'Assess risks'
+),
+Calculate_terms AS (
+  SELECT 
+    AVG(END_TIME - LAG(END_TIME) OVER (PARTITION BY CASE_ID ORDER BY END_TIME)) AS avg_duration
+  FROM 
+    "defaultview-4"
+  WHERE 
+    Activity = 'Calculate terms'
+)
+SELECT 
+  (SELECT avg_duration FROM Assess_risks) - (SELECT avg_duration FROM Calculate_terms) AS duration_diff;
+```
+Error: No hypothesis selected.
+SELECT COUNT(CASE_ID), EVENT_NAME, END_TIME FROM "defaultview-4" GROUP BY EVENT_NAME, END_TIME
+Error: No hypothesis selected.
+SELECT COUNT(CASE WHEN "lifecycle:transition" != 'complete' THEN CASE_ID ELSE NULL END) AS error_count FROM "defaultview-4"
+ "The average time taken to prepare a contract after the 'Standard terms applicable?' event is less than 2 hours."
+
+This hypothesis focuses on the time taken for a specific activity in the process and can be used to investigate the efficiency of the contract preparation step.
+
+
+```sql
+SELECT 
+  AVG(CASE 
+        WHEN "EVENT_NAME" = 'Standard terms applicable?' 
+        THEN (NEXT_END_TIME - END_TIME) / 3600 
+        ELSE NULL 
+      END) AS average_time 
+FROM 
+  ( 
+    SELECT 
+      *, 
+      LEAD(END_TIME, 1, NULL) OVER (PARTITION BY CASE_ID ORDER BY END_TIME) AS NEXT_END_TIME 
+    FROM 
+      "defaultview-4" 
+  ) AS subquery;
+```
+Error: No hypothesis selected.
+SELECT COUNT(CASE_ID) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete' AND Activity = 'Activity name'
+ The average time taken to complete the "Assess risks" activity is longer than the average time taken to complete the "Calculate terms" activity.
+
+
+```sql
+SELECT 
+    (AVG(CASE WHEN Activity = 'Assess risks' THEN END_TIME END) - AVG(CASE WHEN Activity = 'Calculate terms' THEN END_TIME END)) AS time_difference
+FROM 
+    "defaultview-4"
+WHERE 
+    Activity IN ('Assess risks', 'Calculate terms')
+```

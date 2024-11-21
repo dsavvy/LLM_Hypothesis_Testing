@@ -1,3 +1,2 @@
- 
-"The 'Precedence' path, which involves assessing risks, preparing special terms, and calculating terms, has a higher frequency of loopbacks (i.e., revisiting previous activities) compared to the 'Alternate Precedence' path, indicating potential inefficiencies in the risk assessment process."
+ The average time taken to complete the "Assess risks" activity is longer than the average time taken to complete the "Calculate terms" activity.
 

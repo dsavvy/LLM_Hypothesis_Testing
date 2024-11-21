@@ -1,0 +1,406 @@
+{
+    "childShapes": [
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-85147FD1-D065-4B20-9AB9-DC7A04D23C48"
+                }
+            ],
+            "resourceId": "sid-38B9A31A-F0F5-4CC6-9215-BEBE7737BC4A",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-7792BFD6-00E6-4610-9FB6-BC7DB3A82EB6"
+                }
+            ],
+            "resourceId": "sid-DE01AA8F-B36A-4796-9597-651C8B46C6F3",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-26C88D1A-96C0-44BD-9BAF-7D25C707388B"
+                }
+            ],
+            "resourceId": "sid-25136035-D01E-4DC5-AAF9-FE3F803B865B",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-56E77E6D-0667-43B3-855B-AEA6BD2AF93E"
+                }
+            ],
+            "resourceId": "sid-088B345E-B2CA-455B-A649-B3E8A3C9157E",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-04BFD7FE-CDE7-4BAE-A5A1-088ADA1A7A9E"
+                }
+            ],
+            "resourceId": "sid-224B5102-FEB8-44B3-9403-387F263E41A5",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-04BFD7FE-CDE7-4BAE-A5A1-088ADA1A7A9E"
+                }
+            ],
+            "resourceId": "sid-BE5261E4-44C3-4C0E-A6A9-026989C331D1",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-DF31C711-BCD9-4E21-A0F4-07D81A515F31"
+                }
+            ],
+            "resourceId": "sid-CA7B85EC-6945-4F46-B7BB-F8208FD568E0",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-EA2F6C72-7BD0-4726-84FD-9045BE44B73C"
+                }
+            ],
+            "resourceId": "sid-77ADCCB1-8CE0-48B2-BA9C-871C9CBB8214",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-850D153A-D4C2-4853-B59A-13555E19D1A3"
+                }
+            ],
+            "resourceId": "sid-B7ED9CDB-A923-458F-AA47-A5E7812477BE",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-DF31C711-BCD9-4E21-A0F4-07D81A515F31"
+                }
+            ],
+            "resourceId": "sid-DB57838D-7E05-4F45-B36E-765F6F074084",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-86ACDE48-0EBD-40FC-B7D0-C4E9D447E4F8"
+                }
+            ],
+            "resourceId": "sid-FA8EA2F2-B2E7-46FC-9B60-441B02FDF8F8",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": "no",
+                "name_de_de": "nein"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-DE01AA8F-B36A-4796-9597-651C8B46C6F3"
+                }
+            ],
+            "resourceId": "sid-85147FD1-D065-4B20-9AB9-DC7A04D23C48",
+            "stencil": {
+                "id": "Task"
+            },
+            "properties": {
+                "nonebehavioreventref": "signal",
+                "name": "Review \nrequest",
+                "name_de_de": "Antrag \u00fcberpr\u00fcfen"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-25136035-D01E-4DC5-AAF9-FE3F803B865B"
+                },
+                {
+                    "resourceId": "sid-088B345E-B2CA-455B-A649-B3E8A3C9157E"
+                }
+            ],
+            "resourceId": "sid-7792BFD6-00E6-4610-9FB6-BC7DB3A82EB6",
+            "stencil": {
+                "id": "ParallelGateway"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-FA8EA2F2-B2E7-46FC-9B60-441B02FDF8F8"
+                },
+                {
+                    "resourceId": "sid-2C0CB6FB-7B15-4570-975B-89EBCF4072F4"
+                }
+            ],
+            "resourceId": "sid-26C88D1A-96C0-44BD-9BAF-7D25C707388B",
+            "stencil": {
+                "id": "Exclusive_Databased_Gateway"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": "Standard terms\napplicable?",
+                "name_de_de": "Standard-\nkonditionen \nanwendbar?"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-224B5102-FEB8-44B3-9403-387F263E41A5"
+                }
+            ],
+            "resourceId": "sid-F858CA2F-4719-435E-9FF9-8C906CADF2F9",
+            "stencil": {
+                "id": "Task"
+            },
+            "properties": {
+                "nonebehavioreventref": "signal",
+                "name": "Calculate \nterms",
+                "name_de_de": "Konditionen berechnen"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-CA7B85EC-6945-4F46-B7BB-F8208FD568E0"
+                }
+            ],
+            "resourceId": "sid-49FD1952-AF99-4103-963B-22CB8F6C0BB6",
+            "stencil": {
+                "id": "Task"
+            },
+            "properties": {
+                "nonebehavioreventref": "signal",
+                "name": "Prepare contract",
+                "name_de_de": "Vertrag vorbereiten"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-77ADCCB1-8CE0-48B2-BA9C-871C9CBB8214"
+                }
+            ],
+            "resourceId": "sid-DF31C711-BCD9-4E21-A0F4-07D81A515F31",
+            "stencil": {
+                "id": "ParallelGateway"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-B7ED9CDB-A923-458F-AA47-A5E7812477BE"
+                }
+            ],
+            "resourceId": "sid-EA2F6C72-7BD0-4726-84FD-9045BE44B73C",
+            "stencil": {
+                "id": "Task"
+            },
+            "properties": {
+                "nonebehavioreventref": "signal",
+                "name": "Send quote",
+                "name_de_de": "Angebot \nsenden"
+            }
+        },
+        {
+            "outgoing": [],
+            "resourceId": "sid-850D153A-D4C2-4853-B59A-13555E19D1A3",
+            "stencil": {
+                "id": "EndNoneEvent"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": "Quote\nsent",
+                "name_de_de": "Angebot \ngesendet"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-38B9A31A-F0F5-4CC6-9215-BEBE7737BC4A"
+                }
+            ],
+            "resourceId": "sid-1A2C3AFC-4775-461F-9316-ED40DD0B4CA8",
+            "stencil": {
+                "id": "StartNoneEvent"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": "Credit\nrequested",
+                "name_de_de": "Kredit-Antrag"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-BE5261E4-44C3-4C0E-A6A9-026989C331D1"
+                }
+            ],
+            "resourceId": "sid-86ACDE48-0EBD-40FC-B7D0-C4E9D447E4F8",
+            "stencil": {
+                "id": "Task"
+            },
+            "properties": {
+                "nonebehavioreventref": "signal",
+                "name": "Prepare special terms",
+                "name_de_de": "Sonder-konditionen vorbereiten"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-DB57838D-7E05-4F45-B36E-765F6F074084"
+                }
+            ],
+            "resourceId": "sid-56E77E6D-0667-43B3-855B-AEA6BD2AF93E",
+            "stencil": {
+                "id": "Task"
+            },
+            "properties": {
+                "nonebehavioreventref": "signal",
+                "name": "Assess risks",
+                "name_de_de": "Risiken bewerten"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-F858CA2F-4719-435E-9FF9-8C906CADF2F9"
+                }
+            ],
+            "resourceId": "sid-2C0CB6FB-7B15-4570-975B-89EBCF4072F4",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": "yes",
+                "name_de_de": "ja"
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-04C1509D-573F-4F83-898D-FAD6E7B606DA"
+                }
+            ],
+            "resourceId": "sid-04BFD7FE-CDE7-4BAE-A5A1-088ADA1A7A9E",
+            "stencil": {
+                "id": "Exclusive_Databased_Gateway"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        },
+        {
+            "outgoing": [
+                {
+                    "resourceId": "sid-49FD1952-AF99-4103-963B-22CB8F6C0BB6"
+                }
+            ],
+            "resourceId": "sid-04C1509D-573F-4F83-898D-FAD6E7B606DA",
+            "stencil": {
+                "id": "SequenceFlow"
+            },
+            "properties": {
+                "nonebehavioreventref": null,
+                "name": null,
+                "name_de_de": null
+            }
+        }
+    ]
+}

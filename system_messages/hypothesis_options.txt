@@ -1,0 +1,55 @@
+We are conducting statistical hypothesis testing as part of Process Mining. 'Your task is to generate three SQL querys. Next, you will find the textual abstraction of the directly follows relations in the process: Here is the extracted process in a concise textual representation using standard characters:
+
+```
++---------------+
+|  Credit requested  |
++---------------+
+       |
+       |
+       v
++---------------+
+| Review request  |
++---------------+
+       |
+       |
+       v
++---------------+
+|  Parallel Gateway  |
++---------------+
+       |             |
+       |             |
+       v             v
++---------------+  +---------------+
+| Calculate terms |  | Assess risks  |
++---------------+  +---------------+
+       |             |
+       |             |
+       v             v
++---------------+  +---------------+
+|  Exclusive Gateway  |  | Prepare special  |
+|  (Standard terms    |  | terms          |
+|  applicable?)      |  +---------------+
++---------------+             |
+       |             |             |
+       |             |             v
+       |             |  +---------------+
+       |             |  | Prepare contract|
+       v             |  +---------------+
++---------------+             |
+|  (yes)         |             |
++---------------+             |
+       |                       |
+       |                       |
+       v                       v
++---------------+  +---------------+
+|  Send quote    |  | Quote sent    |
++---------------+  +---------------+
+```
+
+This representation shows the events and their associations with each other, using the following notation:
+
+* Boxes represent events or gateways
+* Arrows represent the flow of the process
+* Plus signs (+) represent gateways (e.g. Parallel Gateway, Exclusive Gateway)
+* Vertical lines (|) represent the flow of the process between events
+* Labels on the arrows represent the conditions or names of the flows Furthermore, you must consider the data format. This is an example query that includes all columns of the event log: SELECT CASE_ID, EVENT_NAME, END_TIME, Activity, Resource, elementId, "lifecycle:transition", "org:resource", resourceCost, resourceId FROM "defaultview-4" LIMIT 1This is the result of this query showing all columns of the event log: None

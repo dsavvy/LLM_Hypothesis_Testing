@@ -26,6 +26,7 @@ import Streamlit_build as app
 # 0: SETTING UP THE ENVIRONMENT
 # 0.1 Initialize Signavio:
 #   We authenticate with Signavio and assign the cookies, and headers.
+
 signal_auth_data = signal.signal_authenticate()
 signal_cookies = signal_auth_data['cookies']
 signal_headers = signal_auth_data['headers']

@@ -25,15 +25,14 @@ def get_llm_auth():
     timeout=8000,
     )
     auth_token = response.json()["access_token"]
-    
     return {
         'auth_token': auth_token,
         'resource_group': resource_group
     }
 
 def get_llm_endpoint():
-    llm_model_name = "meta--llama3-70b-instruct"
-    llm_deployment_url = 'https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2/inference/deployments/d59971ba56763962'
+    llm_model_name = "meta--llama3.1-70b-instruct"
+    llm_deployment_url = 'https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2/inference/deployments/ddbc1c41c752b64f'
     endpoint = f"{llm_deployment_url}/chat/completions" # endpoint implemented in serving engine
     return {
         'endpoint': endpoint

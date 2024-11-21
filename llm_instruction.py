@@ -13,11 +13,11 @@ def llm_setup():
 
 # In the LLM Query, we need to do: 1. Provide System Prompt for context. 2. Provide previous User prompts (must be stored somewhere)!. 3. Append new prompt
 def llm_query(sys_mes, user_mes):
-    llm_deployment_url = 'https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2/inference/deployments/d59971ba56763962'
+    llm_deployment_url = 'https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2/inference/deployments/ddbc1c41c752b64f'
     endpoint = f"{llm_deployment_url}/chat/completions" # endpoint implemented in serving engine
     auth_token, resource_group = llm_credentials.get_llm_auth().values()
     input = {
-        "model" : "meta--llama3-70b-instruct",
+        "model" : "meta--llama3.1-70b-instruct",
         "messages": [
             {"content": sys_mes, "role": "system"},
             {"content": user_mes, "role": "user"}
@@ -32,6 +32,7 @@ def llm_query(sys_mes, user_mes):
     }
     #Send prepared POST request to the endpoint using the header and input.
     response = requests.post(endpoint, headers=headers, json=input)
+    print(response)
     response_json = response.json()
     with open("gen_response.json", "w") as file:
         json.dump(response_json, file, indent=4)
@@ -39,7 +40,8 @@ def llm_query(sys_mes, user_mes):
     if "choices" in response_json and len(response_json["choices"]) > 0:
         answer = response_json["choices"][0]["message"]["content"]
     else:
-        print("No answer found in the response.")
+        answer =("No answer found in the response.")
+        print(answer)
     # We return the question posted, and the answer by the LLM.    
     return {
         'answer': answer
