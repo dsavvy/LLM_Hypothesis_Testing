@@ -1,8 +1,32 @@
 ```sql
+WITH 
+  -- Get the end time for 'Calculate terms' activity when 'Assess risks' is executed before it
+  assess_risks_first AS (
+    SELECT 
+      CASE_ID,
+      END_TIME AS end_time
+    FROM 
+      FLATTEN("default-view4") 
+    WHERE 
+      EVENT_NAME MATCHES ('Assess risks' ~> 'Calculate terms')
+  ),
+  
+  -- Get the end time for 'Calculate terms' activity when 'Parallel Gateway' is executed before it
+  parallel_gateway_first AS (
+    SELECT 
+      CASE_ID,
+      END_TIME AS end_time
+    FROM 
+      FLATTEN("default-view4") 
+    WHERE 
+      EVENT_NAME MATCHES ('Parallel Gateway' -> 'Calculate terms')
+  )
+
+-- Compare the average end time for both scenarios
 SELECT 
-    (AVG(CASE WHEN Activity = 'Assess risks' THEN END_TIME END) - AVG(CASE WHEN Activity = 'Calculate terms' THEN END_TIME END)) AS time_difference
+  AVG(assess_risks_first.end_time) AS avg_assess_risks_first,
+  AVG(parallel_gateway_first.end_time) AS avg_parallel_gateway_first
 FROM 
-    "defaultview-4"
-WHERE 
-    Activity IN ('Assess risks', 'Calculate terms')
+  assess_risks_first,
+  parallel_gateway_first
 ```

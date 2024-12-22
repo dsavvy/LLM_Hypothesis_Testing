@@ -298,3 +298,187 @@ FROM
 WHERE 
     Activity IN ('Assess risks', 'Calculate terms')
 ```
+Error: No hypothesis selected.
+SELECT COUNT(*) FROM "defaultview-4" WHERE "lifecycle:transition" = 'COMPLETE' AND "org:resource" = 'Resource A'
+ "Most quotes are sent after the 'Prepare contract' task is completed, implying that contract preparation is a necessary step before sending a quote."
+
+These hypotheses are simple, specific, and can be converted into executable SQL queries to test them. Let me know if you'd like me to help with the SQL queries! 
+
+Also, I can help you to create the SQL queries to test these hypotheses, please let me know!
+```sql
+WITH 
+  -- First, we rank the events in each case by their end time
+  ranked_events AS (
+    SELECT CASE_ID, EVENT_NAME, END_TIME,
+           ROW_NUMBER() OVER (PARTITION BY CASE_ID ORDER BY END_TIME) AS event_rank
+    FROM "defaultview-4"
+  ),
+  -- Then, we identify the events that are 'Prepare contract' and 'Send quote'
+  contract_events AS (
+    SELECT CASE_ID, 
+           MIN(CASE WHEN EVENT_NAME = 'Prepare contract' THEN event_rank END) AS contract_rank,
+           MIN(CASE WHEN EVENT_NAME = 'Send quote' THEN event_rank END) AS quote_rank
+    FROM ranked_events
+    GROUP BY CASE_ID
+  )
+-- Finally, we count the cases where 'Send quote' happens after 'Prepare contract'
+SELECT 
+  COUNT(CASE WHEN quote_rank > contract_rank THEN 1 END) AS num_quotes_after_contract,
+  COUNT(CASE_ID) AS total_quotes
+FROM contract_events;
+```
+Error: No hypothesis selected.
+SELECT COUNT(CASE_ID) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete' AND END_TIME IS NOT NULL
+Error: No hypothesis selected.
+SELECT COUNT(CASE_ID), AVG(resourceCost), MIN(END_TIME), MAX(END_TIME), COUNT(DISTINCT Activity), COUNT(DISTINCT Resource), COUNT(DISTINCT resourceId) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete'
+ "The task 'Review request' is always performed before the task 'Calculate terms'."
+
+
+```sql
+SELECT 
+    COUNT(CASE 
+        WHEN (EVENT_NAME = 'Calculate terms' AND LAG(EVENT_NAME) OVER (PARTITION BY CASE_ID ORDER BY END_TIME) <> 'Review request') 
+        OR (EVENT_NAME = 'Calculate terms' AND LAG(EVENT_NAME) OVER (PARTITION BY CASE_ID ORDER BY END_TIME) IS NULL) 
+        THEN 1 
+    END) AS num_violations
+FROM 
+    "defaultview-4"
+WHERE 
+    EVENT_NAME IN ('Review request', 'Calculate terms');
+```
+ "The 'Send quote' task is always performed after both 'Prepare contract' and 'Prepare special terms' tasks have been completed."
+
+This hypothesis can be tested by analyzing the sequence of events in the event log and verifying that the 'Send quote' task is executed after the completion of both 'Prepare contract' and 'Prepare special terms' tasks.
+
+Let me know if you would like me to convert these hypotheses into SQL queries!
+```sql
+WITH PrepareContract AS (
+  SELECT elementId, MIN(ROW_NUMBER) AS MinRowNum
+  FROM "defaultview-4"
+  WHERE EVENT_NAME = 'Prepare contract'
+  GROUP BY elementId
+),
+PrepareSpecialTerms AS (
+  SELECT elementId, MIN(ROW_NUMBER) AS MinRowNum
+  FROM "defaultview-4"
+  WHERE EVENT_NAME = 'Prepare special terms'
+  GROUP BY elementId
+),
+SendQuote AS (
+  SELECT elementId, MIN(ROW_NUMBER) AS MinRowNum
+  FROM "defaultview-4"
+  WHERE EVENT_NAME = 'Send quote'
+  GROUP BY elementId
+)
+SELECT 
+  'Send quote' AS Task,
+  COUNT(*) AS NumViolations
+FROM (
+  SELECT 
+    c1.elementId
+  FROM 
+    PrepareContract c1
+  INNER JOIN 
+    PrepareSpecialTerms c2 ON c1.elementId = c2.elementId
+  INNER JOIN 
+    SendQuote c3 ON c1.elementId = c3.elementId
+  WHERE 
+    c3.MinRowNum < c1.MinRowNum OR c3.MinRowNum < c2.MinRowNum
+)
+```
+
+Please note that the query requires the `ROW_NUMBER` column that is not present in the original table. To use this query, you need to modify the `SELECT` statement that you provided to include the `ROW_NUMBER` column, like this:
+```sql
+SELECT 
+  CASE_ID,
+  EVENT_NAME,
+  END_TIME,
+  Activity,
+  Resource,
+  elementId,
+  "lifecycle:transition",
+  "org:resource",
+  resourceCost,
+  resourceId,
+  ROW_NUMBER() OVER (PARTITION BY elementId ORDER BY END_TIME) AS ROW_NUMBER
+FROM 
+  "defaultview-4"
+```
+Error: No hypothesis selected.
+SELECT case_id FROM "defaultview-4" WHERE ( SELECT LAST(end_time) - FIRST(end_time) ) > ( SELECT AVG(LAST(end_time) - FIRST(end_time)) )
+ "The time taken to complete the 'Calculate terms' task is shorter when the 'Standard terms applicable?' gateway is evaluated as 'yes' compared to when it is evaluated as 'no'."
+
+
+```sql
+WITH filtered_data AS (
+  SELECT 
+    CASE_ID,
+    END_TIME,
+    Activity,
+    CASE 
+      WHEN elementId = 'Standard terms applicable?' THEN 'yes'
+      ELSE 'no'
+    END AS gateway_evaluation
+  FROM 
+    "defaultview-4"
+  WHERE 
+    Activity = 'Calculate terms'
+)
+SELECT 
+  gateway_evaluation,
+  AVG(END_TIME) AS average_completion_time
+FROM 
+  filtered_data
+GROUP BY 
+  gateway_evaluation
+ORDER BY 
+  gateway_evaluation ASC;
+```
+Error: No hypothesis selected.
+SELECT COUNT(case_id) FROM FLATTEN("default-view4") WHERE event_name MATCHES ('Post Invoice' ~> 'Clear Invoice')
+ "The 'Review request' task is always completed before the 'Calculate terms' and 'Assess risks' tasks."
+
+
+```sql
+SELECT COUNT(CASE_ID) 
+FROM FLATTEN("default-view4") 
+WHERE (EVENT_NAME = 'Review request' AND END_TIME < (SELECT END_TIME FROM FLATTEN("default-view4") AS T2 WHERE T2.CASE_ID = CASE_ID AND T2.EVENT_NAME = 'Calculate terms')) 
+AND (EVENT_NAME = 'Review request' AND END_TIME < (SELECT END_TIME FROM FLATTEN("default-view4") AS T3 WHERE T3.CASE_ID = CASE_ID AND T3.EVENT_NAME = 'Assess risks'))
+```
+Error: No hypothesis selected.
+SELECT * FROM FLATTEN("default-view4") WHERE "lifecycle:transition" = 'complete'
+ "The average time taken to complete the 'Calculate terms' activity is longer when the 'Assess risks' activity is executed before it, compared to when 'Calculate terms' is executed directly after the 'Parallel Gateway'."
+
+
+```sql
+WITH 
+  -- Get the end time for 'Calculate terms' activity when 'Assess risks' is executed before it
+  assess_risks_first AS (
+    SELECT 
+      CASE_ID,
+      END_TIME AS end_time
+    FROM 
+      FLATTEN("default-view4") 
+    WHERE 
+      EVENT_NAME MATCHES ('Assess risks' ~> 'Calculate terms')
+  ),
+  
+  -- Get the end time for 'Calculate terms' activity when 'Parallel Gateway' is executed before it
+  parallel_gateway_first AS (
+    SELECT 
+      CASE_ID,
+      END_TIME AS end_time
+    FROM 
+      FLATTEN("default-view4") 
+    WHERE 
+      EVENT_NAME MATCHES ('Parallel Gateway' -> 'Calculate terms')
+  )
+
+-- Compare the average end time for both scenarios
+SELECT 
+  AVG(assess_risks_first.end_time) AS avg_assess_risks_first,
+  AVG(parallel_gateway_first.end_time) AS avg_parallel_gateway_first
+FROM 
+  assess_risks_first,
+  parallel_gateway_first
+```

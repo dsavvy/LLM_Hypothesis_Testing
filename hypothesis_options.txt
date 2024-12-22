@@ -1,11 +1,9 @@
-Based on the provided process diagram and event log data, here are three hypotheses in natural language:
+Here are three hypotheses in natural language based on the provided business process diagram and event log:
 
-**Hypothesis 1:** The average time taken to complete the "Assess risks" activity is longer than the average time taken to complete the "Calculate terms" activity.
+**Hypothesis 1:** "The average time taken to complete the 'Calculate terms' activity is longer when the 'Assess risks' activity is executed before it, compared to when 'Calculate terms' is executed directly after the 'Parallel Gateway'."
 
-**Hypothesis 2:** The majority of credit requests (more than 80%) follow the "Standard terms applicable" path and result in a "Prepare contract" activity.
+**Hypothesis 2:** "The majority of cases that follow the 'Prepare special terms' path have a higher 'resourceCost' compared to cases that follow the 'Calculate terms' path after the 'Exclusive Gateway'."
 
-**Hypothesis 3:** The "Send quote" activity is typically performed by the same resource (person or team) that performed the preceding "Prepare contract" or "Prepare special terms" activity.
+**Hypothesis 3:** "The 'Send quote' activity is executed more frequently than the 'Prepare contract' activity after the second 'Parallel Gateway'."
 
-These hypotheses are specific, simple, and directly related to the process diagram and event log data. We can convert them into SQL queries to test and validate these hypotheses using the provided data. 
-
-Please let me know if you would like to proceed with converting these hypotheses into SQL queries!
+These hypotheses are designed to be simple, specific, and testable using SQL queries. Let me know if you'd like me to help with converting them into SQL queries!

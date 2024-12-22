@@ -5,20 +5,20 @@
             "index": 0,
             "logprobs": null,
             "message": {
-                "content": "```sql\nSELECT \n    (AVG(CASE WHEN Activity = 'Assess risks' THEN END_TIME END) - AVG(CASE WHEN Activity = 'Calculate terms' THEN END_TIME END)) AS time_difference\nFROM \n    \"defaultview-4\"\nWHERE \n    Activity IN ('Assess risks', 'Calculate terms')\n```",
+                "content": "```sql\nWITH \n  -- Get the end time for 'Calculate terms' activity when 'Assess risks' is executed before it\n  assess_risks_first AS (\n    SELECT \n      CASE_ID,\n      END_TIME AS end_time\n    FROM \n      FLATTEN(\"default-view4\") \n    WHERE \n      EVENT_NAME MATCHES ('Assess risks' ~> 'Calculate terms')\n  ),\n  \n  -- Get the end time for 'Calculate terms' activity when 'Parallel Gateway' is executed before it\n  parallel_gateway_first AS (\n    SELECT \n      CASE_ID,\n      END_TIME AS end_time\n    FROM \n      FLATTEN(\"default-view4\") \n    WHERE \n      EVENT_NAME MATCHES ('Parallel Gateway' -> 'Calculate terms')\n  )\n\n-- Compare the average end time for both scenarios\nSELECT \n  AVG(assess_risks_first.end_time) AS avg_assess_risks_first,\n  AVG(parallel_gateway_first.end_time) AS avg_parallel_gateway_first\nFROM \n  assess_risks_first,\n  parallel_gateway_first\n```",
                 "role": "assistant",
                 "tool_calls": []
             },
             "stop_reason": null
         }
     ],
-    "created": 1732185961,
-    "id": "chat-d87c2f3dd12d4b30a91a4179899be1c1",
+    "created": 1732718402,
+    "id": "chat-83d59d32eebf45b7a9ff2435c1da8760",
     "model": "meta--llama3.1-70b-instruct",
     "object": "chat.completion",
     "usage": {
-        "completion_tokens": 69,
-        "prompt_tokens": 216,
-        "total_tokens": 285
+        "completion_tokens": 218,
+        "prompt_tokens": 921,
+        "total_tokens": 1139
     }
 }

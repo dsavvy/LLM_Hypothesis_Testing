@@ -1,2 +1,2 @@
- The average time taken to complete the "Assess risks" activity is longer than the average time taken to complete the "Calculate terms" activity.
+ "The average time taken to complete the 'Calculate terms' activity is longer when the 'Assess risks' activity is executed before it, compared to when 'Calculate terms' is executed directly after the 'Parallel Gateway'."
 

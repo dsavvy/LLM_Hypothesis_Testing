@@ -1,0 +1,176 @@
+{
+  "metrics": [
+    {
+      "id": "a2d_o2m_sap_erp_notification_creation_automation_rate",
+      "name": "Notification creation automation rate",
+      "description": "Percentage of notification items that were created using automation",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"case_id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('System','Service')\n \tAND (event_name = 'Create Notification')))\n\t))\n\t/ SUM((SELECT COUNT(DISTINCT\"case_id\") FILTER (\n\t\tWHERE event_name = 'Create Notification'\n))) * 100",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "unit": {
+        "type": "SUFFIX",
+        "suffix": "%"
+      },
+      "direction": "UP",
+      "version": "1.0.0"
+    },
+    {
+      "id": "a2d_o2m_sap_erp_manual_notification_creation",
+      "name": "Number of manual notification creations",
+      "description": "Number of notification items that were created manually",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"case_id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('Dialog')\n\t\tAND (event_name = 'Create Notification')\n\t))\n))",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "direction": "DOWN",
+      "version": "1.0.0"
+    },
+    {
+      "id": "a2d_o2m_sap_erp_order_creation_automation_rate",
+      "name": "Order creation automation rate",
+      "description": "Percentage of order items that were created using automation",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"case_id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('System','Service')\n\t\tAND (event_name = 'Create Maintenance Order')))\n\t))\n/ SUM((SELECT COUNT(DISTINCT \"case_id\") FILTER (\n\t\tWHERE event_name = 'Create Maintenance Order'\n))) * 100",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "unit": {
+        "type": "SUFFIX",
+        "suffix": "%"
+      },
+      "direction": "UP",
+      "version": "1.0.0"
+    },
+    {
+      "id": "a2d_o2m_sap_erp_manual_order_creation",
+      "name": "Number of manual order creations",
+      "description": "Number of maintenance order items that were created manually",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"case_id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('Dialog')\n        \tAND (event_name = 'Create Maintenance Order')\n\t))\n))",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "direction": "DOWN",
+      "version": "1.0.0"
+    },
+    {
+      "id": "a2d_o2m_sap_erp_manual_notification_changes_rate",
+      "name": "Manual notification changes rate",
+      "description": "Percentage of notification items that were changed manually",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"Unique Event Id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('Dialog')\n\t\tAND (event_name LIKE 'Change Notification%')))\n\t))\n/ SUM((SELECT COUNT(DISTINCT \"Unique Event Id\") FILTER (\n\t\tWHERE event_name LIKE 'Change Notification%')\n)) * 100",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "unit": {
+        "type": "SUFFIX",
+        "suffix": "%"
+      },
+      "direction": "DOWN",
+      "version": "1.0.0"
+    },
+    {
+      "id": "a2d_o2m_sap_erp_manual_notification_item_changes",
+      "name": "Number of manual notification item changes",
+      "description": "Number of notification items that were changed manually",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"Unique Event Id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('Dialog')\n\t\tAND (event_name LIKE 'Change Notification%'))))\n\t",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "direction": "DOWN",
+      "version": "1.0.0"
+    },
+    {
+      "id": "a2d_o2m_sap_erp_manual_order_changes_rate",
+      "name": "Manual order changes rate",
+      "description": "Percentage of order items that were changed manually",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"Unique Event Id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('Dialog')\n\t\tAND (event_name LIKE 'Change MO%')))\n\t))\n\t/ SUM((SELECT COUNT(DISTINCT \"Unique Event Id\") FILTER (\n\t\tWHERE event_name LIKE 'Change MO%')\n)) * 100",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "unit": {
+        "type": "SUFFIX",
+        "suffix": "%"
+      },
+      "direction": "DOWN",
+      "version": "1.0.0"
+    },
+    {
+      "id": "a2d_o2m_sap_erp_manual_order_item_changes",
+      "name": "Number of manual order item changes",
+      "description": "Number of order items that were changed manually",
+      "signalFragment": "SUM((SELECT COUNT(DISTINCT \"Unique Event Id\") FILTER (\n\t\tWHERE (\"Event Created By User Type\" IN ('Dialog')\n\t\tAND (event_name LIKE 'Change MO%'))))\n\t",
+      "aggregationType": "CASE",
+      "processTypes": [
+        "OPERATE_TO_MAINTAIN"
+      ],
+      "sourceSystems": [
+        "SAP_ECC",
+        "SAP_S4HANA"
+      ],
+      "direction": "DOWN",
+      "version": "1.0.0"
+    }
+  ],
+  "variables": [
+    {
+      "name": "otm_ecc_s4h_automation_condition",
+      "description": "Condition indicating that an event was automated, for example \"Event Created By User Type\" = 'System','Service'",
+      "defaultValues": [
+        {
+          "defaultValue": "\"Event Created By User Type\" IN ('System','Service')",
+          "sourceSystems": [
+            "SAP_ECC",
+            "SAP_S4HANA"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "otm_ecc_s4h_manual_condition",
+      "description": "Condition indicating that an event was manual, for example \"Event Created By User Type\" = 'Dialog'",
+      "defaultValues": [
+        {
+          "defaultValue": "\"Event Created By User Type\" = 'Dialog'",
+          "sourceSystems": [
+            "SAP_ECC",
+            "SAP_S4HANA"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -12,6 +12,7 @@ from PIL import Image as PILImage
 from io import BytesIO
 import requests
 import json
+import pandas as pd
 from diagram_generateDFG import GenTextualAbstraction
 import signal_queries as signal
 
@@ -56,7 +57,7 @@ def suggestHypothesis():
     DFG_relation = GenTextualAbstraction()
 
     # 1.3 Retrieve 1 line from the event log
-    signal_eventlog_query="SELECT CASE_ID, EVENT_NAME, END_TIME, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM \"defaultview-4\" LIMIT 1"
+    signal_eventlog_query="SELECT case_id, event_name, end_time, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM \"defaultview-4\" LIMIT 1"
     event_log_exc = signal.query_signal(signal_eventlog_query)
 
     # 1.4 Build first LLM system message
@@ -104,3 +105,25 @@ def choose_hypothesis(options):
     with open(file_path, "w") as file:
         file.write(hypothesis)
     return hypothesis
+
+def ExtractExampleQueries():
+    files = ["cycle_time.json"]
+    
+    rows = []
+    
+    
+    for file in files:
+        with open (f"./metric_definitions/{file}","r") as file:
+            metric = json.load(file)
+        for metric in metric['metrics']:
+            description = metric['description']
+            signal_fragment = metric['signalFragment']
+            rows.append({"Description": description, "SIGNAL_code": signal_fragment})
+    query_df = pd.DataFrame(rows)
+    json_table = query_df.to_dict(orient="index")
+    with open("./example_queries.json", "w") as file:
+        json.dump(json_table, file)
+        
+
+ExtractExampleQueries()
+    
