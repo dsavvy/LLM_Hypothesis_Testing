@@ -33,4 +33,22 @@ def signal_authenticate():
         'headers': headers
     }
 
+def st_signal_authenticate(tenant_id, user_name, pw):
+    with open('signavio-credentials.txt') as f:
+        sk = json.load(f)
+    system_instance = sk["system_instance"]
+    authenticator = SignavioAuthenticator.SignavioAuthenticator(system_instance, tenant_id, user_name, pw)
+    auth_data = authenticator.authenticate()
+    print("authenticated!")
+    #Sets cookies and headers for future API requests. These include session info (JSESSIONID, LBROUTEID) and an authentication token (x-signavio-id).  
+    cookies = {'JSESSIONID': auth_data['jsesssion_ID'], 'LBROUTEID': auth_data['lb_route_ID']}
+    headers = {'Accept': 'application/json', 'x-signavio-id':  auth_data['auth_token']}
+    return {
+        'cookies': cookies,
+        'headers': headers
+    }    
 
+def load_credentials():
+    with open("signavio-credentials.txt", "r") as file:
+        return json.load(file)
+   

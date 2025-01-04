@@ -5,7 +5,7 @@ import streamlit as st
 
 def initialize_streamlit():
     # Define title of the app
-    st.title("PM Hypothesis Testing App")
+    st.title("Generate Hypotheses for Process Intelligence with LLMs")
     # Set up an empty session state / chat history.
     if "messages" not in st.session_state:
         st.session_state.messages = []

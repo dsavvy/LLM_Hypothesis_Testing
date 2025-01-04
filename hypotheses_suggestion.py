@@ -33,8 +33,36 @@ def showProcess(cookies, headers):
     png_path = './graph.png'
     with open(png_path, 'wb') as f:
         f.write(png_request.content)
-    st.image(image, caption="Process Diagram of the most common process flow within your event log.")
+    if image.mode in ("RGBA", "LA"):
+        white_background = PILImage.new("RGBA", image.size, "WHITE")
+        image = PILImage.alpha_composite(white_background, image).convert("RGB")
+    st.image(image, caption="Process Diagram of the most common process flow within the example event log.")
     return image
+
+def selectDirection():
+    if "direction" not in st.session_state:
+        st.session_state["direction"] = ""
+
+    app.response("Please select in which direction you want to build a hypothesis.")
+
+    # Use `st.button` with a callback to set session state directly
+    if st.button("Check Data Quality", key="data_check"):
+        st.session_state["direction"] = "data_check"
+        app.response("We will Check Data Quality")
+    if st.button("Check Process Conformance", key="conf_check"):
+        st.session_state["direction"] = "conf_check"
+        app.response("We will Check Process Conformance")
+    if st.button("Enhance Process Model", key="enhance_model"):
+        st.session_state["direction"] = "enhance_model"
+        app.response("We will look for optimization opportunities")
+    
+    # Check and provide fallback if no valid direction is selected
+    if not st.session_state["direction"]:
+        app.response("Please select hypothesis 1, 2, or 3 by the respective button.")
+        st.session_state["direction"] = "Error: No direction selected."
+    
+    return st.session_state["direction"]
+
 
 
 def suggestHypothesis():
