@@ -1,32 +1,11 @@
 ```sql
-WITH 
-  -- Get the end time for 'Calculate terms' activity when 'Assess risks' is executed before it
-  assess_risks_first AS (
-    SELECT 
-      CASE_ID,
-      END_TIME AS end_time
-    FROM 
-      FLATTEN("default-view4") 
-    WHERE 
-      EVENT_NAME MATCHES ('Assess risks' ~> 'Calculate terms')
-  ),
-  
-  -- Get the end time for 'Calculate terms' activity when 'Parallel Gateway' is executed before it
-  parallel_gateway_first AS (
-    SELECT 
-      CASE_ID,
-      END_TIME AS end_time
-    FROM 
-      FLATTEN("default-view4") 
-    WHERE 
-      EVENT_NAME MATCHES ('Parallel Gateway' -> 'Calculate terms')
-  )
-
--- Compare the average end time for both scenarios
-SELECT 
-  AVG(assess_risks_first.end_time) AS avg_assess_risks_first,
-  AVG(parallel_gateway_first.end_time) AS avg_parallel_gateway_first
-FROM 
-  assess_risks_first,
-  parallel_gateway_first
+SELECT COUNT(*) 
+FROM (
+  SELECT T1.case_id, MIN(T1.end_time) AS assess_time, MIN(T2.end_time) AS prepare_time
+  FROM "defaultview-4" T1 
+  INNER JOIN "defaultview-4" T2 ON T1.case_id = T2.case_id 
+  WHERE T1.Activity = 'Assess risks' AND T2.Activity = 'Prepare contract'
+  GROUP BY T1.case_id
+  HAVING MIN(T1.end_time) > MIN(T2.end_time)
+) AS invalid_cases;
 ```

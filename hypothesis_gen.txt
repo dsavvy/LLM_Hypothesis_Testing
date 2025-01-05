@@ -1,1 +1,4 @@
-Error: No hypothesis selected.
+ "For every case, the 'Assess risks' activity always occurs before the 'Prepare contract' activity."
+
+This hypothesis checks if the parallel gateway is working correctly and if the activities 'Assess risks' and 'Calculate terms' are indeed executed before the exclusive gateway.
+

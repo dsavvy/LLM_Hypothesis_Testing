@@ -20,6 +20,38 @@ def generate_query():
     # 1. Provide context for what to do
     sysgen1 = "You are conducting statistical hypothesis testing as part of Process Mining. You have the following hypothesis: "
     sys_message_gen = f"{sysgen1}{hypothesis}"
+    sysgen2 = "Your task provided by the user message will be to transform this hypothesis into a valid SQL query. You will execute it on our database with the following column names: "
+    signal_eventlog_query="SELECT case_id, event_name, end_time, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM \"defaultview-4\" LIMIT 1"
+    sys_message_gen=f"{sys_message_gen}{sysgen2}{signal_eventlog_query}"
+    sysgen3 = "This data base request provided you with the correct column names. This is the result of the query from which you can determine the data types and formats in each column: "
+    event_log_exc = signal.query_signal(signal_eventlog_query)
+    sys_message_gen=f"{sys_message_gen}{sysgen3}{event_log_exc}"
+    # Save the query to a text file
+    with open("./system_messages/hypothesis_generation", "w") as file:
+        file.write(sys_message_gen)
+        
+    sys_message_user = "Transform this hypothesis into a valid SQL query with valid syntax to execute on our database given its column names, content, and structure. Make sure your query follows valid SQL syntax. Just return the generated query, and nothing else. Return simply and only your generated SQL query. Your result must be directly executable."    
+    app.response(sys_message_user)
+    query = llm_query(sys_message_gen, sys_message_user)
+    query = query['answer']
+    query = query.strip()
+    app.response("This is the generated query: " + query)
+    with open("./hypothesis_query.txt", "w") as file:
+       file.write(query)
+    
+    return query   
+
+
+
+
+def generate_query_SIGNAL():
+    # This is the generated hypothesis in a text file
+    with open("./hypothesis_gen.txt", "r") as file:
+        hypothesis = file.read()
+
+    # 1. Provide context for what to do
+    sysgen1 = "You are conducting statistical hypothesis testing as part of Process Mining. You have the following hypothesis: "
+    sys_message_gen = f"{sysgen1}{hypothesis}"
     # 2. Provide the exemplary select query that contains all available rows in the event log.
     sysgen2 = "You are going to generate an SIGNAL query to work on my event log database. I will provide you with an exemplary SIGNAL statement that explicitly states all rows available so you know how to build the query: "
     signal_eventlog_query="SELECT case_id, event_name, end_time, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM \"defaultview-4\" LIMIT 1"

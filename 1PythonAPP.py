@@ -59,6 +59,24 @@ app.response(direction)
 
 hyp_options = suggestHypothesis()
 
+hypothesis = choose_hypothesis(hyp_options)
+
+# End result: Initial Hypothesis selected; Stored under variable "hypothesis" and in file "hypothesis_gen.txt"
+
+# Only start this, once we have populated the hypothesis.
+if isinstance(hypothesis, str):
+    app.response("You selected the hypothesis: " + hypothesis)
+    app.response("Now, the agent generates a query to test this hypothesis.")
+    
+query = generate_query()
+
+# This outputs a response with the query in the app.
+
+with open("./session_output.txt", "a") as file:
+    file.write(f"{hypothesis}\n{query}\n")
+    
+
+
 
 
 

@@ -1,9 +1,15 @@
-Here are three hypotheses in natural language based on the provided business process diagram and event log:
+Here are three hypotheses in natural language that we can use to investigate the process:
 
-**Hypothesis 1:** "The average time taken to complete the 'Calculate terms' activity is longer when the 'Assess risks' activity is executed before it, compared to when 'Calculate terms' is executed directly after the 'Parallel Gateway'."
+**Hypothesis 1:** "Every case that starts with 'Credit requested' eventually reaches the 'Quote sent' activity."
 
-**Hypothesis 2:** "The majority of cases that follow the 'Prepare special terms' path have a higher 'resourceCost' compared to cases that follow the 'Calculate terms' path after the 'Exclusive Gateway'."
+This hypothesis checks if the process is complete and if every case that starts with 'Credit requested' actually reaches the end of the process.
 
-**Hypothesis 3:** "The 'Send quote' activity is executed more frequently than the 'Prepare contract' activity after the second 'Parallel Gateway'."
+**Hypothesis 2:** "For every case, the 'Assess risks' activity always occurs before the 'Prepare contract' activity."
 
-These hypotheses are designed to be simple, specific, and testable using SQL queries. Let me know if you'd like me to help with converting them into SQL queries!
+This hypothesis checks if the parallel gateway is working correctly and if the activities 'Assess risks' and 'Calculate terms' are indeed executed before the exclusive gateway.
+
+**Hypothesis 3:** "For every case, if the 'Standard terms applicable?' gateway is answered with 'yes', then the next activity is always 'Prepare contract'."
+
+This hypothesis checks if the exclusive gateway is working correctly and if the conditions for the gateway are applied correctly.
+
+These hypotheses are simple, specific, and can be converted into executable SQL queries later. Let me know if you'd like me to proceed with creating the SQL queries!

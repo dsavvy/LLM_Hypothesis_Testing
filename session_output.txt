@@ -482,3 +482,21 @@ FROM
   assess_risks_first,
   parallel_gateway_first
 ```
+Error: No hypothesis selected.
+SELECT COUNT(DISTINCT case_id) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete' AND Activity = 'Error'
+ "For every case, the 'Assess risks' activity always occurs before the 'Prepare contract' activity."
+
+This hypothesis checks if the parallel gateway is working correctly and if the activities 'Assess risks' and 'Calculate terms' are indeed executed before the exclusive gateway.
+
+
+```sql
+SELECT COUNT(*) 
+FROM (
+  SELECT T1.case_id, MIN(T1.end_time) AS assess_time, MIN(T2.end_time) AS prepare_time
+  FROM "defaultview-4" T1 
+  INNER JOIN "defaultview-4" T2 ON T1.case_id = T2.case_id 
+  WHERE T1.Activity = 'Assess risks' AND T2.Activity = 'Prepare contract'
+  GROUP BY T1.case_id
+  HAVING MIN(T1.end_time) > MIN(T2.end_time)
+) AS invalid_cases;
+```
