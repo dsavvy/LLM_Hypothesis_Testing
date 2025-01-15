@@ -500,3 +500,5 @@ FROM (
   HAVING MIN(T1.end_time) > MIN(T2.end_time)
 ) AS invalid_cases;
 ```
+Error: No hypothesis selected.
+SELECT COUNT(*) FROM "defaultview-4"

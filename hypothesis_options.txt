@@ -1,15 +1,1 @@
-Here are three hypotheses in natural language that we can use to investigate the process:
-
-**Hypothesis 1:** "Every case that starts with 'Credit requested' eventually reaches the 'Quote sent' activity."
-
-This hypothesis checks if the process is complete and if every case that starts with 'Credit requested' actually reaches the end of the process.
-
-**Hypothesis 2:** "For every case, the 'Assess risks' activity always occurs before the 'Prepare contract' activity."
-
-This hypothesis checks if the parallel gateway is working correctly and if the activities 'Assess risks' and 'Calculate terms' are indeed executed before the exclusive gateway.
-
-**Hypothesis 3:** "For every case, if the 'Standard terms applicable?' gateway is answered with 'yes', then the next activity is always 'Prepare contract'."
-
-This hypothesis checks if the exclusive gateway is working correctly and if the conditions for the gateway are applied correctly.
-
-These hypotheses are simple, specific, and can be converted into executable SQL queries later. Let me know if you'd like me to proceed with creating the SQL queries!
+I'm ready to help. Go ahead and share the three hypothesis ideas in natural language. I'll review them and then help you convert them into SQL queries.

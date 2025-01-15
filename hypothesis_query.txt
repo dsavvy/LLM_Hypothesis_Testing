@@ -1,11 +1,1 @@
-```sql
-SELECT COUNT(*) 
-FROM (
-  SELECT T1.case_id, MIN(T1.end_time) AS assess_time, MIN(T2.end_time) AS prepare_time
-  FROM "defaultview-4" T1 
-  INNER JOIN "defaultview-4" T2 ON T1.case_id = T2.case_id 
-  WHERE T1.Activity = 'Assess risks' AND T2.Activity = 'Prepare contract'
-  GROUP BY T1.case_id
-  HAVING MIN(T1.end_time) > MIN(T2.end_time)
-) AS invalid_cases;
-```
+SELECT COUNT(*) FROM "defaultview-4"
