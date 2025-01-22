@@ -12,7 +12,6 @@ sap-llm-credentials.txt
 SAP_LLM_test_REST.py
 Signal_test.py
 Signal_test_GPT.py
-signavio-credentials.txt
 pip install openai.py
 __pycache__/
 process_declare_constraints.txt
