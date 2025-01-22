@@ -33,7 +33,7 @@ def generate_query(hypothesis):
     query = query['answer']
     query = query.strip()
     app.response("This is the generated SQL query: " + query)
-    with open("./hypothesis_query.txt", "w") as file:
+    with open("./hypothesis_query.txt", "a") as file:
        file.write(query)
     
     return query   
