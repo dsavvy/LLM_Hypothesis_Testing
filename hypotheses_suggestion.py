@@ -1,11 +1,4 @@
 from llm_instruction import llm_query
-import signal_credentials as signal
-import llm_functions_main as func
-import os
-from langgraph.checkpoint.memory import MemorySaver
-import llm_langchain_connector as LLM
-from langchain_core.output_parsers import StrOutputParser
-from llm_instruction import llm_query
 import streamlit as st
 import Streamlit_build as app
 from PIL import Image as PILImage
@@ -76,20 +69,7 @@ def selectDirection():
 
 
 def suggestHypothesis(direction):
-    # 1: SELECT INITIAL HYPOTHESIS
-    ##ideas =  f.generate_ideas(signal_cookies, signal_headers, llm)
-    ##print(ideas)
-    # 1.1: Generate DECLARE CONSTRAINTS: CONFUSED LLM; DEPRECATED FOR NOW
-    #declare_constraints = func.generate_constraints()
-    #declare_constraints_str = "\n".join(declare_constraints)
-    #declare_constraints_str = declare_constraints_str.replace("[", " ").replace("]", " ").replace("(", " ").replace(")", " ").replace("\n", " ")
-    #file_path = "./process_declare_constraints.txt"
-    #with open(file_path, "w") as file:
-    #    file.write(declare_constraints_str)
-
-    ##result = f.signal_query(signal_cookies, signal_headers)
-    ##print(result)
-
+    app.query(f"{"I want to "} {direction})")
 
     # 1.2: Generate DFG graph - Textual Abstraction
     DFG_relation = GenTextualAbstraction()
@@ -110,7 +90,7 @@ def suggestHypothesis(direction):
     sysgen4 = "Try to make the hypotheses as simple and specific as possible so we can convert them into simple, directly executable SQL queries later."
     sys_message_gen = f"{sys_message_gen}{direction}{sysgen4}{". "}"
     sys_message_user = "I am building three hypotheses ideas in natural language we can use to investigate the described process."
-    app.query(f"I want to {direction}")
+    
 
     # We print the query to the chat window for the user to see
     

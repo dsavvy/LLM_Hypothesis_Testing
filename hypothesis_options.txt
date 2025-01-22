@@ -141,4 +141,24 @@ This hypothesis aims to test the decision point in the process model, specifical
 
 This hypothesis aims to test the conformance of the event log data to the expected process model, specifically the sequence of activities after the decision point 'Standard terms applicable?'.
 
-These hypotheses are simple, specific, and can be converted into executable SQL queries to test the data in the event log.
+These hypotheses are simple, specific, and can be converted into executable SQL queries to test the data in the event log.Here are three hypothesis ideas in natural language that can be used to investigate the described process:
+
+1. "The 'Review request' task is always performed before the 'Assess risks' task."
+
+This hypothesis can be tested by examining the sequence of events in the event log to determine if the 'Review request' task is always followed by the 'Assess risks' task.
+
+2. "The 'Prepare special terms' task is only performed when the 'Standard terms applicable?' gateway is answered 'no'."
+
+This hypothesis can be tested by examining the event log to determine if the 'Prepare special terms' task is only performed after the 'Standard terms applicable?' gateway has been answered 'no'.
+
+3. "The 'Send quote' task is always performed after the 'Prepare contract' task and the 'Prepare special terms' task (if applicable)."
+
+This hypothesis can be tested by examining the sequence of events in the event log to determine if the 'Send quote' task is always preceded by the 'Prepare contract' task and the 'Prepare special terms' task (if applicable).
+
+These hypotheses are specific and can be tested using SQL queries on the event log data.Here are three hypotheses in natural language that can be used to investigate the process:
+
+1. The task "Assess risks" is always performed before the task "Prepare special terms".
+2. The task "Send quote" is always performed after the task "Calculate terms".
+3. The task "Prepare contract" is performed by the same resource as the task "Review request" in at least 80% of the cases.
+
+These hypotheses are specific, simple, and directly executable as SQL queries. They aim to test the conformance of the event log data to the process model, and can help identify potential enhancements to the process.No answer found in the response.

@@ -5,22 +5,22 @@
             "index": 0,
             "logprobs": null,
             "message": {
-                "content": "```sql\nSELECT \n  COUNT(case_id) FILTER (WHERE \n    event_name MATCHES ('Credit requested' -> 'Review request' -> 'Standard terms applicable?')\n  ) / COUNT(case_id) * 100\nFROM \n  FLATTEN(\"defaultview-4\")\n```",
+                "content": "Here are three hypotheses in natural language for investigating the process:\n\n1. \"All 'Prepare special terms' tasks are performed after the 'Assess risks' task in a case.\"\n   This hypothesis can help us verify if the event log data conforms to our process model, specifically checking the order of tasks.\n\n2. \"The 'Send quote' task is only performed by 'Default Resource-000002'.\"\n   This hypothesis can help us verify if the event log data conforms to our process model, specifically checking the resource allocation for a particular task.\n\n3. \"All cases that involve the 'Prepare special terms' task also involve the 'Assess risks' task.\"\n   This hypothesis can help us verify if the event log data conforms to our process model, specifically checking the co-occurrence of tasks.\n\nThese hypotheses are designed to be simple and specific, making it easier to convert them into executable SQL queries later.",
                 "role": "assistant",
                 "tool_calls": []
             },
             "stop_reason": null
         }
     ],
-    "created": 1737552080,
-    "id": "chatcmpl-179a0bc82557451fb8dcb221ec51992b",
+    "created": 1737555263,
+    "id": "chatcmpl-8cacfd6d31be43c583e89519dc0db465",
     "model": "meta--llama3.1-70b-instruct",
     "object": "chat.completion",
     "prompt_logprobs": null,
     "usage": {
-        "completion_tokens": 60,
-        "prompt_tokens": 2116,
+        "completion_tokens": 185,
+        "prompt_tokens": 2693,
         "prompt_tokens_details": null,
-        "total_tokens": 2176
+        "total_tokens": 2878
     }
 }

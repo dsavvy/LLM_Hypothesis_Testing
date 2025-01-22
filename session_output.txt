@@ -672,3 +672,87 @@ SELECT
 FROM 
   FLATTEN("defaultview-4")
 ```
+answer: "The 'Prepare special terms' task is only performed when the 'Standard terms applicable?' gateway is answered 'no'."
+```sql
+SELECT 
+    COUNT(*) 
+FROM 
+    ( 
+    SELECT 
+        T1.case_id 
+    FROM 
+        Process T1 
+    WHERE 
+        T1.Activity = 'Prepare special terms'
+        AND T1.case_id NOT IN 
+        ( 
+            SELECT 
+                T2.case_id
+            FROM 
+                Process T2
+            WHERE 
+                T2.Activity = 'Standard terms applicable?'
+                AND T2."lifecycle:transition" = 'complete'
+        ) 
+    UNION ALL 
+    SELECT 
+        T1.case_id 
+    FROM 
+        Process T1 
+    WHERE 
+        T1.Activity = 'Prepare special terms'
+        AND T1.case_id IN 
+        ( 
+            SELECT 
+                T2.case_id
+            FROM 
+                Process T2
+            WHERE 
+                T2.Activity = 'Standard terms applicable?'
+                AND T2."lifecycle:transition" = 'complete'
+                AND NOT EXISTS 
+                ( 
+                    SELECT 
+                        1 
+                    FROM 
+                        Process T3 
+                    WHERE 
+                        T3.case_id = T2.case_id 
+                        AND T3.Activity = 'Standard terms applicable?' 
+                        AND T3."lifecycle:transition" = 'complete' 
+                        AND T3.elementId = T2.elementId
+                        AND T3."org:resource" = 'no'
+                )
+        )
+    ) T
+```
+answer: "The 'Prepare special terms' task is only performed when the 'Standard terms applicable?' gateway is answered 'no'."
+```sql
+SELECT COUNT(DISTINCT case_id) 
+FROM FLATTEN("defaultview-4") 
+WHERE "lifecycle:transition" = 'complete' AND Activity IN ('Prepare special terms') 
+AND event_name NOT MATCHES ('Standard terms applicable?' ~> 'yes' -> 'Prepare special terms');
+```
+answer: The task "Send quote" is always performed after the task "Calculate terms".
+```sql
+SELECT 
+    CASE 
+        WHEN EXISTS (
+            SELECT 1 
+            FROM your_table_name e1
+            JOIN your_table_name e2 ON e1.CASE_ID = e2.CASE_ID
+            WHERE e1.EVENT_NAME = 'Send quote' AND e2.EVENT_NAME = 'Calculate terms'
+            AND e1.END_TIME < e2.END_TIME
+        ) THEN 'False'
+        ELSE 'True'
+    END AS result
+```
+answer: The task "Send quote" is always performed after the task "Calculate terms".
+```sql
+SELECT 
+  COUNT(case_id) 
+FROM 
+  FLATTEN("defaultview-4") 
+WHERE 
+  event_name NOT MATCHES ('Calculate terms' ~> 'Send quote')
+```

@@ -1,12 +1,5 @@
 from llm_instruction import llm_query
-import signal_credentials as signal
-import llm_functions_main as func
-import os
-from langgraph.checkpoint.memory import MemorySaver
-import llm_langchain_connector as LLM
-from langchain_core.output_parsers import StrOutputParser
 from llm_instruction import llm_query
-from hypotheses_suggestion import suggestHypothesis
 import Streamlit_build as app
 import signal_queries as signalq
 import json
@@ -18,7 +11,9 @@ def generate_query(hypothesis):
     sysgen1 = "You are conducting statistical hypothesis testing as part of Process Mining. You have the following hypothesis: "
     sys_message_gen = f"{sysgen1}{hypothesis}"
     sysgen2 = "Your task provided by the user message will be to transform this hypothesis into a valid SQL query. You will execute it on our database with the following column names: "
-    signal_eventlog_query="SELECT case_id, event_name, end_time, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM Process LIMIT 1"
+    signal_eventlog_query = 'SELECT CASE_ID, EVENT_NAME, END_TIME, Activity, Resource, elementId, '
+    '"lifecycle:transition", "org:resource", resourceCost, resourceId '
+    'FROM "defaultview-4" LIMIT 1'
     sys_message_gen=f"{sys_message_gen}{sysgen2}{signal_eventlog_query}"
     sysgen3 = "This data base request provided you with the correct column names. This is the result of the query from which you can determine the data types and formats in each column: "
     event_log_exc = signalq.query_signal(signal_eventlog_query)
