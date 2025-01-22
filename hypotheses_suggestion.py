@@ -58,7 +58,7 @@ def selectDirection():
             "role": "user",
             "content": "I want to look for optimization opportunities"
         })
-
+    
     # Show fallback message if still not chosen
     if not st.session_state["direction"]:
         app.response("Please select hypothesis 1, 2, or 3 by the respective button.")
@@ -69,7 +69,7 @@ def selectDirection():
 
 
 def suggestHypothesis(direction):
-    app.query(f"{"I want to "} {direction})")
+    app.query (f"{"I want to "} {st.session_state["direction"]}")
 
     # 1.2: Generate DFG graph - Textual Abstraction
     DFG_relation = GenTextualAbstraction()

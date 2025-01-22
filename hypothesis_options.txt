@@ -161,4 +161,18 @@ These hypotheses are specific and can be tested using SQL queries on the event l
 2. The task "Send quote" is always performed after the task "Calculate terms".
 3. The task "Prepare contract" is performed by the same resource as the task "Review request" in at least 80% of the cases.
 
-These hypotheses are specific, simple, and directly executable as SQL queries. They aim to test the conformance of the event log data to the process model, and can help identify potential enhancements to the process.No answer found in the response.
+These hypotheses are specific, simple, and directly executable as SQL queries. They aim to test the conformance of the event log data to the process model, and can help identify potential enhancements to the process.No answer found in the response.Here are three hypotheses in natural language that can be used to investigate the process:
+
+1. **All 'Review request' tasks are directly followed by a 'ParallelGateway' task.**
+
+This hypothesis aims to verify if the 'Review request' task is always followed by a 'ParallelGateway' task in the process, as described in the process model. 
+
+2. **All 'Calculate terms' tasks are directly followed by an 'ExclusiveGateway' task.**
+
+This hypothesis aims to verify if the 'Calculate terms' task is always followed by an 'ExclusiveGateway' task in the process, as described in the process model.
+
+3. **All 'Prepare special terms' tasks are directly followed by a 'ParallelGateway' task.**
+
+This hypothesis aims to verify if the 'Prepare special terms' task is always followed by a 'ParallelGateway' task in the process, as described in the process model.
+
+These hypotheses can be used as a starting point to create SQL queries to test the process and identify any deviations or areas for improvement.

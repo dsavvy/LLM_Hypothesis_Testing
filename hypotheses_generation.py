@@ -49,7 +49,7 @@ def generate_query_SIGNAL(hypothesis):
     event_log_exc = signalq.query_signal(signal_eventlog_query)
     sys_message_gen = f"{sys_message_gen}{sysgen3}{event_log_exc}"
     # 4. Describe the paticularities of the SIGNAL language
-    sysgen4 = ('SIGNAL is based on SQL, but is specifically designed for Process Intelligence. Always select FROM default-view4 as you see in the examples. The event log and the event info in it (end_date, etc.) is nested. Always use FLATTEN("default-view4") to mitigate that.')
+    sysgen4 = ('SIGNAL is based on SQL, but is specifically designed for Process Intelligence. Always select FROM default-view4 as you see in the examples.')
     sys_message_gen = f"{sys_message_gen}{sysgen4}"
     # 5. Describe what NOT to use in SIGNAL language
     sysgen5 = ('Do not use JOIN. Do not use the WITH operator. ')

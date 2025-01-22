@@ -756,3 +756,26 @@ FROM
 WHERE 
   event_name NOT MATCHES ('Calculate terms' ~> 'Send quote')
 ```
+answer: **All 'Review request' tasks are directly followed by a 'ParallelGateway' task.**
+```sql
+SELECT 
+    COUNT(CASE_ID) AS num_inconsistent_processes
+FROM 
+    (
+    SELECT 
+        T1.CASE_ID,
+        LAG(T1.EVENT_NAME) OVER (PARTITION BY T1.CASE_ID ORDER BY T1.END_TIME) AS prev_event,
+        T1.EVENT_NAME,
+        LEAD(T1.Activity) OVER (PARTITION BY T1.CASE_ID ORDER BY T1.END_TIME) AS next_activity
+    FROM 
+        your_table_name T1
+    ) subquery
+WHERE 
+    prev_event = 'Review request' AND next_activity != 'ParallelGateway'
+```
+answer: **All 'Review request' tasks are directly followed by a 'ParallelGateway' task.**
+```sql
+SELECT COUNT(case_id)
+FROM FLATTEN("defaultview-4")
+WHERE event_name MATCHES ('Review request' -> 'ParallelGateway')
+```
