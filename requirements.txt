@@ -7,7 +7,7 @@ anyio==4.6.0
 asttokens==2.4.1
 attrs==24.2.0
 blinker==1.8.2
-bpmnconstraints @ git+https://github.com/signavio/bpmn2constraints.git
+bpmnconstraints @ git+https://github.com/signavio/bpmn2constraints.git@87d2408545719c617967abb219935d3bb7ef4a41
 cachetools==5.5.0
 certifi==2024.8.30
 charset-normalizer==3.3.2
