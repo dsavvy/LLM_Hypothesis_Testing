@@ -46,12 +46,14 @@ def query_signal(query):
         result = signal_request.json()
     except requests.exceptions.RequestException as e:
         logging.error(f"Request failed: {e}")
-        result = None
+        result = "Request Exception"
     except json.JSONDecodeError as e:
         logging.error(f"Failed to parse JSON response: {e}")
-        result = None
-    print(result)
+        result = "JSON Decode Error"
     #result = signal_request.json()['data'][0][0]
+    return str(result)
+
+
     
 test = query_signal('SELECT CASE_ID, EVENT_NAME, END_TIME, Activity, Resource, elementId, '
     '"lifecycle:transition", "org:resource", resourceCost, resourceId '

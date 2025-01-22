@@ -1,92 +1,91 @@
-from llm_instruction import llm_query
-import signal_credentials as signal
-import llm_functions_main as func
-import os
-import json
-from langgraph.checkpoint.memory import MemorySaver
-import llm_langchain_connector as LLM
-from langchain_core.output_parsers import StrOutputParser
-from llm_instruction import llm_query
-from hypotheses_suggestion import showProcess, suggestHypothesis, choose_hypothesis, selectDirection
-from hypotheses_generation import generate_query
-from query_execution import execute_query
-from query_evaluation import evaluate_query
 import streamlit as st
 import Streamlit_build as app
-# USE: streamlit run /home/domi/Documents/VSC_Github/LLM_Hypothesis_Testing/1PythonAPP.py
+import signal_credentials as signal
+from hypotheses_suggestion import showProcess, suggestHypothesis, choose_hypothesis, selectDirection
+from hypotheses_generation import generate_query, generate_query_SIGNAL
 
-# 0 Setup: Initialize Streamlit
-app.initialize_streamlit()
+def main():
+    # 0. Basic initialization
+    app.initialize_streamlit()
+    app.response("Welcome! I am your LLM agent. I will help you generate hypotheses and code to investigate your process.")
 
-app.response("Welcome! I am your LLM agent. I will help you generate hypotheses, and exemplary code to investigate your process in depth.")
-app.response("First, provide your Signavio credentials.")
+    # Make sure we have a place to store state flags/variables
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+    if "investigation_started" not in st.session_state:
+        st.session_state.investigation_started = False
+    if "signal_cookies" not in st.session_state:
+        st.session_state.signal_cookies = None
+    if "signal_headers" not in st.session_state:
+        st.session_state.signal_headers = None
+    direction="" 
 
+    # 1. Collect and authenticate credentials
+    st.subheader("Signavio Credentials")
+    credentials = signal.load_credentials()
+    user_name = st.text_input("User Name", value=credentials.get("user_name", ""))
+    password = st.text_input("Password", value=credentials.get("pw", ""), type="password")
+    tenant_id = credentials.get("tenant_id", "")
 
-# 1. Authenticate with Signavio
-credentials = signal.load_credentials()
-tenant_id = st.text_input("Tenant ID", value=credentials.get("tenant_id", ""))
-user_name = st.text_input("User Name", value=credentials.get("user_name", ""))
-pw = st.text_input("Password", value=credentials.get("pw", ""), type="password")
-if st.button("Authenticate"):
-    new_credentials = {"tenant_id": tenant_id, "user_name": user_name, "pw": pw}
-    try:
-        signal_auth_data = signal.st_signal_authenticate(tenant_id, user_name, pw)
-        signal_cookies = signal_auth_data['cookies']
-        signal_headers = signal_auth_data['headers']
-        if signal_cookies:
-            st.success("Successfully authenticated!")
-            st.session_state.signal_cookies = signal_cookies
-            st.session_state.signal_headers = signal_headers
+    if st.button("Authenticate"):
+        try:
+            auth_data = signal.st_signal_authenticate(tenant_id, user_name, password)
+            st.session_state.signal_cookies = auth_data['cookies']
+            st.session_state.signal_headers = auth_data['headers']
             st.session_state.authenticated = True
+            st.success("Successfully authenticated!")
+        except Exception as e:
+            st.error(f"Authentication failed: {e}")
+            st.session_state.authenticated = False
+
+    # 2. Proceed only if authenticated
+    if st.session_state.authenticated:
+        st.subheader("Process Selection")
+        revision_id = st.text_input("Process ID", "1fe7397c17304d3ba4ea41f1eefc97fe", key="revision_id")
+        
+        if st.button("Start Investigation"):
+            st.success("Fetching process data...")
+            try:
+                # Show or retrieve process info, store if needed
+                showProcess(st.session_state.signal_cookies, st.session_state.signal_headers)
+                st.session_state.investigation_started = True
+            except Exception as e:
+                st.error(f"Could not fetch process data: {e}")
+                st.session_state.investigation_started = False
+
+    # 3. If the process data is fetched, proceed with hypothesis steps
+    if st.session_state.investigation_started:
+        # (A) Choose direction only once
+        if "direction" not in st.session_state:
+            st.session_state.direction = selectDirection()
+            app.response(st.session_state.direction)
             
-        else:
-            st.error("Authentication failed. Please rerun the app and provide different credentials or use the suggested ones.")
-    except Exception as e:
-        st.error(f"Authentication failed: {e}")
-
-# Workaround: These cannot be saved where I need to press the button, otherwise it causes issues with streamlit.
-signal_auth_data = signal.st_signal_authenticate(tenant_id, user_name, pw)
-signal_cookies = signal_auth_data['cookies']
-signal_headers = signal_auth_data['headers']     
-# 1.1 Provide a graph of our process
-app.response("In our prototype, we investigate an example event log to create a credit quote. The most common process flow is depicted below.")
-graph = showProcess(signal_cookies, signal_headers)
-
-
-app.response("We can use hypotheses to test multiple aspects. Most common are: \n 1. Data Quality Check: Testing the data quality of the event log \n 2. Conformance Checking: Testing deviations between observed and expected standard process behavior. \n 3. Enhancement: Finding outliers and aspects to improve the standard process model")
-direction = selectDirection()
-app.response(direction)
-
-hyp_options = suggestHypothesis()
-
-hypothesis = choose_hypothesis(hyp_options)
-
-# End result: Initial Hypothesis selected; Stored under variable "hypothesis" and in file "hypothesis_gen.txt"
-
-# Only start this, once we have populated the hypothesis.
-if isinstance(hypothesis, str):
-    app.response("You selected the hypothesis: " + hypothesis)
-    app.response("Now, the agent generates a query to test this hypothesis.")
-    
-query = generate_query()
-
-# This outputs a response with the query in the app.
-
-with open("./session_output.txt", "a") as file:
-    file.write(f"{hypothesis}\n{query}\n")
-    
+        
+        # (B) Show possible hypotheses only once
+        if "hyp_options" not in st.session_state:
+            st.session_state.hyp_options = suggestHypothesis(st.session_state.direction)
+            app.response(st.session_state.hyp_options)
+        # (C) Let user pick from the hypotheses via choose_hypothesis
+        #     Only pick if we haven't already
+        if "selected_hypothesis" not in st.session_state:
+            chosen_hyp = choose_hypothesis(st.session_state.hyp_options)
+            if chosen_hyp != "Error: No hypothesis selected.":
+                st.session_state.selected_hypothesis = chosen_hyp
+            app.response(f"You selected the hypothesis: {st.session_state.selected_hypothesis}")
 
 
+        if "SQL_query" not in st.session_state:
+            query = generate_query(st.session_state.selected_hypothesis)
+            st.session_state.SQLquery = query
+            with open("./session_output.txt", "a") as file:
+                file.write(f"{st.session_state.selected_hypothesis}\n{query}\n")
+        
+        if "SIGNAL_query" not in st.session_state:
+            SIGNAL_query = generate_query_SIGNAL(st.session_state.selected_hypothesis)
+            st.session_state.SIGNALquery = SIGNAL_query
+            with open("./session_output.txt", "a") as file:
+                file.write(f"{st.session_state.selected_hypothesis}\n{SIGNAL_query}\n")
 
 
-
-
-# 2. Select what you want to do with the process. 
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    main()

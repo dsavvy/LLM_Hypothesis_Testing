@@ -14,7 +14,7 @@ import requests
 import json
 import pandas as pd
 from diagram_generateDFG import GenTextualAbstraction
-import signal_queries as signal
+import signal_queries as signalq
 
 def showProcess(cookies, headers):
     with open('signavio-credentials.txt') as f:
@@ -45,27 +45,37 @@ def selectDirection():
 
     app.response("Please select in which direction you want to build a hypothesis.")
 
-    # Use `st.button` with a callback to set session state directly
     if st.button("Check Data Quality", key="data_check"):
-        direction = "Check Data Quality"
-        st.session_state.messages.append({"role": "user", "content":"I want to check Data Quality"})
+        st.session_state["direction"] = "Check Data Quality"
+        st.session_state.messages.append({
+            "role": "user",
+            "content": "I want to check Data Quality"
+        })
+
     if st.button("Check Process Conformance", key="conf_check"):
-        st.session_state["direction"] = "conf_check"
-        direction = "Check Process Conformance"
-        st.session_state.messages.append({"role": "user", "content":"I want to Check Process Conformance"})
+        st.session_state["direction"] = "Check Process Conformance"
+        st.session_state.messages.append({
+            "role": "user",
+            "content": "I want to Check Process Conformance"
+        })
+
     if st.button("Enhance Process Model", key="enhance_model"):
-        direction = "Enhance Process Model"
-        st.session_state.messages.append({"role": "user", "content":"I want to look for optimization opportunities"})
-    # Check and provide fallback if no valid direction is selected
+        st.session_state["direction"] = "Enhance Process Model"
+        st.session_state.messages.append({
+            "role": "user",
+            "content": "I want to look for optimization opportunities"
+        })
+
+    # Show fallback message if still not chosen
     if not st.session_state["direction"]:
         app.response("Please select hypothesis 1, 2, or 3 by the respective button.")
-        direction = "Error: No direction selected."
-    
-    return direction
+
+    return st.session_state["direction"]
 
 
 
-def suggestHypothesis():
+
+def suggestHypothesis(direction):
     # 1: SELECT INITIAL HYPOTHESIS
     ##ideas =  f.generate_ideas(signal_cookies, signal_headers, llm)
     ##print(ideas)
@@ -86,56 +96,57 @@ def suggestHypothesis():
 
     # 1.3 Retrieve 1 line from the event log
     signal_eventlog_query="SELECT case_id, event_name, end_time, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM \"defaultview-4\" LIMIT 1"
-    event_log_exc = signal.query_signal(signal_eventlog_query)
+    event_log_exc = signalq.query_signal(signal_eventlog_query)
 
     # 1.4 Build first LLM system message
     sysgenDFG = "We are conducting statistical hypothesis testing as part of Process Mining. 'Your task is to generate three hypotheses, and then SQL querys. Next, you will find the textual abstraction of the directly follows relations in the process: "
-    sys_message_gen = f"{sysgenDFG}{DFG_relation}"
+    sys_message_gen = f"{sysgenDFG}{DFG_relation}{". "}"
     sysgenlog = " Furthermore, you must consider the data format. This is an example query that includes all columns of the event log: "
-    sys_message_gen=f"{sys_message_gen}{sysgenlog}{signal_eventlog_query}"
+    sys_message_gen=f"{sys_message_gen}{sysgenlog}{signal_eventlog_query}{". "}"
     sysgenlog2 = "This is the result of this query showing all columns of the event log: "
     sysgen3 = "Now, create three hypothesis in natural language based on the data provided. In Process Mining, we use hypothesis to test either test the quality of the data in the event log, check if the event log data conforms to our process model, or to find enhancements to the process. You will build hypothesis to test the following direction: "
-    sys_message_gen=f"{sys_message_gen}{sysgenlog2}{event_log_exc}{sysgen3}"
-    direction = st.session_state["direction"]
+    sys_message_gen=f"{sys_message_gen}{sysgenlog2}{event_log_exc}{sysgen3}{". "}"
     
     sysgen4 = "Try to make the hypotheses as simple and specific as possible so we can convert them into simple, directly executable SQL queries later."
-    sys_message_gen = f"{sys_message_gen}{direction}{sysgen4}."
+    sys_message_gen = f"{sys_message_gen}{direction}{sysgen4}{". "}"
     sys_message_user = "I am building three hypotheses ideas in natural language we can use to investigate the described process."
-    app.response(sys_message_user)
+    app.query(f"I want to {direction}")
+
     # We print the query to the chat window for the user to see
     
     # 1.5 Query the LLM with the system message and the user message
     answer = llm_query(sys_message_gen, sys_message_user)
     answer = answer['answer']
     app.response(answer)
-    with open("./hypothesis_options.txt", "w") as file:
-       file.write(answer)
+    with open("./hypothesis_options.txt", "a") as file:
+        file.write(direction)
+        file.write(answer)
     return answer
 
 
 def choose_hypothesis(options):
+    """
+    Returns the hypothesis string if any selection button is pressed.
+    Otherwise returns 'Error: No hypothesis selected.'
+    """
+    
+    # Check for button clicks
     if st.button("Select Hypothesis 1", key="hyp_1"):
-        with st.chat_message("user"):
-            st.markdown("You selected hypothesis 1")
-        st.session_state.messages.append({"role": "user", "content": "You selected hypothesis 1"})    
-        hypothesis = options.split("**Hypothesis 1:**")[1].split("**Hypothesis 2:**")[0]
+        st.session_state.selected_hypothesis = llm_query("Extract Hypothesis 1. Only extract and return the first hypothesis, and nothing else.", options)
     elif st.button("Select Hypothesis 2", key="hyp_2"):
-        with st.chat_message("user"):
-            st.markdown("You selected hypothesis 2")
-        st.session_state.messages.append({"role": "user", "content": "You selected hypothesis 2"})
-        hypothesis = options.split("**Hypothesis 2:**")[1].split("**Hypothesis 3:**")[0]
+        st.session_state.selected_hypothesis = llm_query("Extract Hypothesis 2. Only extract and return the second hypothesis, and nothing else.", options)
     elif st.button("Select Hypothesis 3", key="hyp_3"):
-        with st.chat_message("user"):
-            st.markdown("You selected hypothesis 3")
-        st.session_state.messages.append({"role": "user", "content": "You selected hypothesis 3"})
-        hypothesis = options.split("**Hypothesis 3:**")[1]
-    else:
-        print("Invalid input. Please select hypothesis 1, 2, or 3 by the respective button.")
-        hypothesis = "Error: No hypothesis selected."
-    file_path = "./hypothesis_gen.txt"
-    with open(file_path, "w") as file:
-        file.write(hypothesis)
-    return hypothesis
+        # Fix the small typo: use .split(), not a comma
+        st.session_state.selected_hypothesis = llm_query("Extract Hypothesis 3. Only extract and return the third hypothesis, and nothing else.", options)
+    # If a hypothesis was chosen, persist it to file
+    if "selected_hypothesis" in st.session_state and st.session_state.selected_hypothesis:    
+        with open("./hypothesis_gen.txt", "a") as file:
+            st.session_state.selected_hypothesis = ", ".join(f"{key}: {value}" for key, value in st.session_state.selected_hypothesis.items())
+            file.write(st.session_state.selected_hypothesis)
+        return st.session_state.selected_hypothesis
+    
+    return "Error: No hypothesis selected."
+
 
 def ExtractExampleQueries():
     files = ["cycle_time.json"]

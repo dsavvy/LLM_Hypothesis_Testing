@@ -502,3 +502,173 @@ FROM (
 ```
 Error: No hypothesis selected.
 SELECT COUNT(*) FROM "defaultview-4"
+Error: No hypothesis selected.
+SELECT COUNT case_id FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete' AND Activity = 'Error'
+Error: No hypothesis selected.
+SELECT COUNT(*) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete'
+Error: No hypothesis selected.
+SELECT COUNT(*) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete'
+Error: No hypothesis selected.
+SELECT COUNT(*) FROM defaultview-4 WHERE elementId IN ( SELECT elementId FROM defaultview-4 WHERE "lifecycle:transition" = 'complete' ) AND "lifecycle:transition" = 'running'
+Error: No hypothesis selected.
+SELECT * FROM ( SELECT T1.case_id, T1.event_name, T1.end_time, T1.Activity, T1.Resource, T1.elementId, T1."lifecycle:transition", T1."org:resource", T1.resourceCost, T1.resourceId, COUNT(T2.case_id) AS Count  FROM "defaultview-4" T1  INNER JOIN "defaultview-4" T2 ON T1.case_id = T2.case_id AND T1.end_time = T2.end_time  GROUP BY T1.case_id, T1.event_name, T1.end_time, T1.Activity, T1.Resource, T1.elementId, T1."lifecycle:transition", T1."org:resource", T1.resourceCost, T1.resourceId ) T3  WHERE T3.Count > 1
+Error: No hypothesis selected.
+SELECT CASE WHEN COUNT(CASE WHEN "lifecycle:transition" = 'COMPLETE' THEN case_id END) * 1.0 / COUNT(case_id) > 0.8 THEN 'Reject' ELSE 'Accept' END AS H0 FROM "defaultview-4"
+Error: No hypothesis selected.
+SELECT COUNT(*) FROM ( SELECT T1.case_id FROM ( SELECT DISTINCT case_id, event_name, end_time, Activity, Resource, elementId, "lifecycle:transition", "org:resource", resourceCost, resourceId FROM "defaultview-4" ) AS T1 INNER JOIN ( SELECT DISTINCT case_id, event_name, end_time, Activity, Resource, elementId, "lifecycle:transition", "org:resource", resourceCost, resourceId FROM "defaultview-4" ) AS T2 ON T1.case_id = T2.case_id AND T1.event_name != T2.event_name AND T1.end_time != T2.end_time ) AS T3
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+Error: No hypothesis selected.
+No answer found in the response.
+None
+SELECT COUNT(*) FROM "defaultview-4" WHERE "lifecycle:transition" = 'complete'
+answer: There is no hypothesis provided to extract.
+There is no hypothesis provided.
+answer: No answer found in the response.
+No answer found in the response.
+answer: No answer found in the response.
+No answer found in the response.
+answer: Hypothesis 1: The process always starts with the 'Credit requested' event.
+```sql
+SELECT 
+  COUNT(CASE WHEN event_name != 'Credit requested' THEN case_id END) AS invalid_start_events
+FROM 
+  (
+    SELECT 
+      case_id, 
+      event_name, 
+      ROW_NUMBER() OVER(PARTITION BY case_id ORDER BY end_time) AS event_order
+    FROM 
+      "defaultview-4"
+  ) AS event_sequence
+WHERE 
+  event_order = 1;
+```
+answer: No answer found in the response.
+No answer found in the response.
+answer: **Hypothesis 1: All cases that follow the 'Standard terms applicable?' path with a 'yes' answer will have a shorter total processing time compared to cases that follow the 'no' path.**
+```sql
+WITH cte AS (
+  SELECT 
+    T1.case_id,
+    T1.end_time AS start_time,
+    T2.end_time AS end_time,
+    T1.elementId AS standard_terms_path
+  FROM 
+    "defaultview-4" T1
+  INNER JOIN 
+    "defaultview-4" T2 ON T1.case_id = T2.case_id
+  WHERE 
+    T1.event_name = 'Standard terms applicable?' AND 
+    T2.event_name = 'O_Pending Offers' AND 
+    T2."lifecycle:transition" = 'COMPLETE' AND 
+    T1.elementId IN ('yes', 'no')
+)
+SELECT 
+  standard_terms_path,
+  AVG(end_time - start_time) AS average_processing_time
+FROM 
+  cte
+GROUP BY 
+  standard_terms_path
+ORDER BY 
+  average_processing_time
+```
+answer: **Hypothesis 1: All cases that follow the 'Standard terms applicable?' path with a 'yes' answer will have a shorter total processing time compared to cases that follow the 'no' path.**
+```sql
+WITH 
+  standard_terms_applicable_yes AS (
+    SELECT 
+      AVG(T2.end_time - T1.end_time) AS avg_total_processing_time
+    FROM 
+      FLATTEN("default-view4") T1
+    INNER JOIN 
+      FLATTEN("default-view4") T2 ON T1.case_id = T2.case_id
+    WHERE 
+      T1.event_name = 'Standard terms applicable?' 
+      AND T1.elementId = 'yes'
+      AND T2.event_name = 'End'
+  ),
+  standard_terms_applicable_no AS (
+    SELECT 
+      AVG(T2.end_time - T1.end_time) AS avg_total_processing_time
+    FROM 
+      FLATTEN("default-view4") T1
+    INNER JOIN 
+      FLATTEN("default-view4") T2 ON T1.case_id = T2.case_id
+    WHERE 
+      T1.event_name = 'Standard terms applicable?' 
+      AND T1.elementId = 'no'
+      AND T2.event_name = 'End'
+  )
+SELECT 
+  CAST(standard_terms_applicable_yes.avg_total_processing_time - standard_terms_applicable_no.avg_total_processing_time AS REAL) / standard_terms_applicable_no.avg_total_processing_time AS result
+FROM 
+  standard_terms_applicable_yes
+CROSS JOIN 
+  standard_terms_applicable_no;
+```
+answer: The process always follows the sequence of activities 'Credit requested' -> 'Review request' -> 'Standard terms applicable?'.
+No answer found in the response.
+answer: The process always follows the sequence of activities 'Credit requested' -> 'Review request' -> 'Standard terms applicable?'.
+No answer found in the response.
+answer: The process always follows the sequence of activities 'Credit requested' -> 'Review request' -> 'Standard terms applicable?'.
+```sql
+WITH ordered_activities AS (
+  SELECT 
+    case_id,
+    event_name,
+    end_time,
+    Activity,
+    ROW_NUMBER() OVER (PARTITION BY case_id ORDER BY end_time) AS activity_order
+  FROM 
+    "defaultview-4"
+)
+SELECT 
+  COUNT(DISTINCT case_id) = COUNT(*)
+FROM (
+  SELECT 
+    case_id,
+    CASE 
+      WHEN Activity = 'Credit requested' THEN 1
+      WHEN Activity = 'Review request' THEN 2
+      WHEN Activity = 'Standard terms applicable?' THEN 3
+      ELSE 0
+    END AS activity_sequence
+  FROM 
+    ordered_activities
+  WHERE 
+    Activity IN ('Credit requested', 'Review request', 'Standard terms applicable?')
+) AS subquery
+GROUP BY 
+  case_id, activity_order
+HAVING 
+  SUM(activity_sequence) = SUM(activity_order * 1.0);
+```
+answer: The process always follows the sequence of activities 'Credit requested' -> 'Review request' -> 'Standard terms applicable?'.
+```sql
+SELECT 
+  COUNT(case_id) FILTER (WHERE 
+    event_name MATCHES ('Credit requested' -> 'Review request' -> 'Standard terms applicable?')
+  ) / COUNT(case_id) * 100
+FROM 
+  FLATTEN("defaultview-4")
+```

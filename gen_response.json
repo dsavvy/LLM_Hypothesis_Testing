@@ -5,20 +5,22 @@
             "index": 0,
             "logprobs": null,
             "message": {
-                "content": "Here is the extracted process in a textual representation using standard BPMN 2.0 notation:\n\n```\n+---------------+\n|  Start    |\n|  (Credit  |\n|  requested) |\n+---------------+\n       |\n       |\n       v\n+---------------+\n| Review request |\n|  (Antrag \u00fcber- |\n|  pr\u00fcfen)        |\n+---------------+\n       |\n       |\n       v\n+---------------+\n|  Parallel    |\n|  Gateway     |\n+---------------+\n       |             |\n       |             |\n       v             v\n+---------------+  +---------------+\n| Assess risks  |  | Calculate    |\n|  (Risiken    |  | terms        |\n|  bewerten)    |  | (Konditionen |\n+---------------+  | berechnen)    |\n       |             +---------------+\n       |             |\n       |             |\n       v             v\n+---------------+  +---------------+\n| Prepare special|  | Prepare      |\n| terms        |  | contract     |\n| (Sonder-     |  | (Vertrag     |\n| konditionen   |  | vorbereiten) |\n| vorbereiten)  |  +---------------+\n+---------------+\n       |             |\n       |             |\n       v             v\n+---------------+  +---------------+\n|  Exclusive  |  |  Send quote  |\n|  Gateway    |  |  (Angebot    |\n+---------------+  |  senden)     |\n       |             +---------------+\n       |             |\n       |             |\n       v             v\n+---------------+  +---------------+\n|  (yes)       |  |  (no)        |\n+---------------+  +---------------+\n       |             |\n       |             |\n       v             v\n+---------------+  +---------------+\n| Calculate    |  | Prepare      |\n| terms        |  | special terms|\n| (Konditionen |  | (Sonder-     |\n| berechnen)    |  | konditionen  |\n+---------------+  | vorbereiten) |\n       |             +---------------+\n       |             |\n       |             |\n       v             v\n+---------------+  +---------------+\n|  Parallel    |  |  End         |\n|  Gateway     |  |  (Quote sent) |\n+---------------+  +---------------+\n       |             |\n       |             |\n       v             v\n+---------------+\n| Prepare contract|\n| (Vertrag     |\n| vorbereiten) |\n+---------------+\n       |\n       |\n       v\n+---------------+\n|  End        |\n|  (Contract  |\n|  prepared)  |\n+---------------+\n```\n\nThis representation should allow you to easily draw the business process diagram without any further adjustments or thinking.",
+                "content": "```sql\nSELECT \n  COUNT(case_id) FILTER (WHERE \n    event_name MATCHES ('Credit requested' -> 'Review request' -> 'Standard terms applicable?')\n  ) / COUNT(case_id) * 100\nFROM \n  FLATTEN(\"defaultview-4\")\n```",
                 "role": "assistant",
                 "tool_calls": []
             },
             "stop_reason": null
         }
     ],
-    "created": 1736093077,
-    "id": "chat-53853213ef90452f89d83f2182b90e67",
+    "created": 1737552080,
+    "id": "chatcmpl-179a0bc82557451fb8dcb221ec51992b",
     "model": "meta--llama3.1-70b-instruct",
     "object": "chat.completion",
+    "prompt_logprobs": null,
     "usage": {
-        "completion_tokens": 579,
-        "prompt_tokens": 3486,
-        "total_tokens": 4065
+        "completion_tokens": 60,
+        "prompt_tokens": 2116,
+        "prompt_tokens_details": null,
+        "total_tokens": 2176
     }
 }

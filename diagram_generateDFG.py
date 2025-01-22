@@ -83,7 +83,7 @@ def textualabstraction():
     with open("diagram_textualabstraction.json", "r") as f:
         data = f.read()
     
-    sys_message =("We are conducting Process Mining. You will receive a textual abstraction of the events, and their relations to each other in JSON format. From this, extract the events, and their associations with each other. rom your textual output I should be able to draw a business process diagram without any further adjustments or thinking from my side. Choose an appropriate textual representation, only use standard characters, and only return that. Be as concise as possible. ")
+    sys_message =("We are conducting Process Mining. You will receive a textual abstraction of the events, and their relations to each other in JSON format. From this, extract the events, and their associations with each other. From your textual output I should be able to draw a business process diagram without any further adjustments or thinking from my side. Choose an appropriate textual representation, only use standard characters, and only return that. Be as concise as possible. ")
     user_message = (data)
     response = llm_query(sys_message, user_message)
     response = response['answer']

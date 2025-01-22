@@ -1,1 +1,8 @@
-SELECT COUNT(*) FROM "defaultview-4"
+```sql
+SELECT 
+  COUNT(case_id) FILTER (WHERE 
+    event_name MATCHES ('Credit requested' -> 'Review request' -> 'Standard terms applicable?')
+  ) / COUNT(case_id) * 100
+FROM 
+  FLATTEN("defaultview-4")
+```
