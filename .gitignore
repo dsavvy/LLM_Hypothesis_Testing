@@ -1,6 +1,5 @@
 .env/
 .venv/
-bpmnconstraints/
 irpa-r1156-joint-master-thesi-sk.txt
 openai-test.py
 pip install openai.py
