@@ -84,6 +84,10 @@ def suggestHypothesis(direction):
     sysgenlog = " Furthermore, you must consider the data format. This is an example query that includes all columns of the event log: "
     sys_message_gen=f"{sys_message_gen}{sysgenlog}{signal_eventlog_query}{". "}"
     sysgenlog2 = "This is the result of this query showing all columns of the event log: "
+    sysgenx = "The following text will provide you with some context about hypothesis testing in Process Mining, and for what it is used: "
+    with open("./hypothesis_suggestion_context.txt", "r") as file:
+        context = file.read()
+    sys_message_gen = f"{sys_message_gen}{sysgenx}{context}{". "}"    
     sysgen3 = "Now, create three hypothesis in natural language based on the data provided. In Process Mining, we use hypothesis to test either test the quality of the data in the event log, check if the event log data conforms to our process model, or to find enhancements to the process. You will build hypothesis to test the following direction: "
     sys_message_gen=f"{sys_message_gen}{sysgenlog2}{event_log_exc}{sysgen3}{". "}"
     
