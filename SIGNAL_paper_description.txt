@@ -1,0 +1,161 @@
+Architecture
+SIGNAL’s architecture is comprised of the following components (also see Figure 2).
+REST API and engine interface. The SIGNAL query engine interface is exposed via a RESTful application programming interface (API) that allows users (humans or systems) to register SIGNAL queries and have the engine execute them and re- turn the result. The main process mining tool that SIGNAL is integrated with uses SIGNAL via the REST API as the central language for producing process min-
+ing analyses. Users can either use SIGNAL directly (here, the tool abstracts from known contexts such as the current process scope) or use so-called widgets in a graphical user interface that are then compiled to SIGNAL queries by the front-end system. In addition to the REST API, a data ingestion API allows for the one-off upload of data, as well as for the regular ingestion of process data updates. Sup- ported formats are extensible event streaming (XES) [3] and comma-/tab-separated valuefiles(CSVsandTSV).Tofacilitatetheimplementationofprocessminingand
+
+Fig.2: SIGNAL engine architecture.
+solutions, advanced data on-boarding tooling is available as part of the technology ecosystem that surrounds SIGNAL.
+Parser. Based on the SIGNAL language definition (described in Section 5), SIGNAL
+queriesareparsedandtheresultingabstractsyntaxtreeishandedovertothelogical plan builder.
+Logical plan builder. The logical plan builder takes the parsed query, executes a type
+check, and optimizes the query execution plan. On the logical level, a separation between case level and event level exists. On either level, the types Boolean, Number, String, Timestamp, and Duration are supported.
+Optimizers. Workloads are dynamically scheduled and optimized. Here, several of
+the optimization steps take advantage of the pre-sorted storage of the event logs (total order of events). This applies, for example, to distinct counts and window functions/partitions. To optimize for interactive performance, the LIMIT operator reduces the size of data to process as early as possible. This is especially useful for facilitating the analysis of process data through a browser-based user interface, where explorative queries are typically performed on a limited subset of the data by design.
+Physical Plan Builder. After optimization, the logical plan is converted into a physi-
+cal execution plain. During the conversion snapshots of the required table columns are made. The physical plan is a tree or list of operators and executed in a sepa- rate thread to isolate effects of unexpected behaviors that may negatively impact performance.
+Executor with operator and expression implementations, and compute kernels.
+SIGNAL supports the typical operators and functions for SQL-based data analysis, plus additional operators for analyzing (temporal) control flow. The low-level com- pute kernels for relational algebra operations are optimized for high-throughput processing and work directly on the columnar data.
+Table manager and memory manager. Memory and table management is enabled by open source frameworks for language-independent in-memory analytics using a columnar approach to data management that allows for the nesting of cases into
+event log tables.
+Metadata storage and event log storage. Compute and storage infrastructure is pro-
+videdbydifferenthyperscalers.Metadataisstoredinatraditionalrelationaldatabase, whereas event logs are stored separately in the Apache Arrow columnar format4,
+which allows fast read access because no complex joins are required.
+Note that we keep the architecture description deliberately abstract, as implementa- tion details, such as the exact technologies used for a specificlayer, are prone to change andinsomecases,differentinstancesmayrunonsomewhatdifferenttechnologystacks.
+A key aspect of SIGNAL is the columnar approach for data persistence. As depicted in Table 1, SIGNAL represents an event log as a table of cases, whereby each case has a nested table containing the events comprising the case. A case has a required case id attribute, each event has required event name and end time attributes, as well as an optional start time attribute5. Both cases and events can have several additional attributes (which are typically domain-specific).The events in each case are ordered by their end time timestamps. This facilitates fast read operations.
+5 The Query Language
+The SIGNAL language is designed to query event logs represented in columnar format as described above (Figure 1), using an SQL-based syntax, with a focus on read op- erations. Here, the table that is queried from is typically fixed, i.e., a mere pointer by identifier to the corresponding ingested event log has to be provided; in many scenar- ios, this is handled by the integrating system, for example by a front-end application for process analysis. In addition to standard SQL operators for data extraction and aggre- gation, SIGNAL features a row pattern matching approach for managing logical time (orders), i.e., for identifying cases with behaviors (events) matching the specified tem- poral constraints.
+4 https://arrow.apache.org/docs/format/Columnar.html, accessed 30-01-
+2022.
+5 In our examples, we merely use end time, which reflects a typical real-world property of
+event logs: in most scenarios, an event has exactly one timestamp, representing the time at which the event has been registered in the system.
+Table 1: Columnar model for representing event logs.
+case ID
+customer ID
+final status
+events
+1001
+C2001
+done
+event name
+end time
+status
+
+
+
+Open ticket
+1675086864052
+none
+
+
+
+Assign ticket
+1675160180724
+open
+
+
+
+Close ticket
+1675220315296
+done
+1002
+C2002
+blocked
+event name
+end time
+status
+
+
+
+Open ticket
+1675147138009
+none
+
+
+
+Assign ticket
+1675213914098
+open
+
+
+
+Close ticket
+1675282027657
+blocked
+
+
+
+Open ticket
+1675414104525
+blocked
+Before going into the details of temporal pattern matching with SIGNAL, let us provide some remarks regarding the assumptions we make about information that is available on case and event level, and in particular about the availability of timestamps. A minimal case definition entails a case identifier, a sorted list of event names, event start timestamps (empty if missing), and event end timestamps. This means the start timestamps of events in event logs yield a partial preoder on the events, whereas the end timestamps are guaranteed to yield a total preorder – however, because on event log- level, a sequence is enforced and ties are broken in case of non-unique timestamps, we can assume a partial order and a total order, respectively. In practice event start times- tamps are typically missing, as the execution times of activities are often not logged; in the enterprise systems that are the ultimate sources of event logs, an event is typi- cally created only when an activity is concluded. For example, when a purchase order is created, there is typically no start time; merely the submission of the form triggers an event. Indeed, one could argue that even if opening the form logs a start timestamp, this timestamp is potentially misleading: after all, the user may have spent substantial time preparing the purchase order before opening the form. In case users want to rely on classical SQL only (without row pattern matching, but with some additional basic operators for handling temporal relationships between events), they can flattenthe case tables that are nested into the event log table.
+Figure 3 shows a nested SIGNAL query that obtains the average cycle time of a pro- cess from an event log persisted in the SIGNAL database and visualizes how the result is obtained. Note that row pattern matching is not used; instead, the query relies on the FIRST andLASToperators.Theevent-levelsub-query(SELECT LAST(end time) - FIRST(end time) canbethoughtofashavinganimplicitFROM events clause. This means that logically, expressions inside the aggregation operate on individual rows of the nested EVENTStable. FIRST and LASTare aggregation functions (just like MIN orMAX)thatreduceseveralinputstoasinglevalue.Theresultofevent-levelsub-queries must be a single value, which we can ensure by requiring an aggregation function inside thesub-query.Theevent-levelsub-queryisimportantfromatype-checkingperspective. Outside of it, an expression involving end time would refer to multiple values, which is not allowed.
+
+Fig.3: Querying nested tables with SIGNAL: average cycle time. The selected cycle times (from which the average is then computed) are displayed on the right hand-side.
+The behavior of the row pattern matching approach can be demonstrated in a semi- formal way using a simple graph-based model of a case. We definea case C = (E;R) as a finite set of events E and R  E  E, where we denote (a;b) 2 R by a  band (a;b) 2 R; (b;a) 62R by a b, and stipulate that R is a total order6 on E that can be inferred from the end timestamps of the case events. To check whether a case satisfies temporal constraints, we introduce a finite set of behavior constraints B, as well as a behavioral matching function (partial function) f : B ! 2E that maps behaviors to sets of events.
+Let us provide a brief SIGNAL language tutorial that firstgives some general intu- itions before we definethe row pattern matching approach more precisely. For example, in a customer support request handling process, we may want to define cases in which tickets have been re-opened after they have been closed. With SIGNAL, we can query thisbehavior(withsomeassumptionsmadeabouttheprovidedeventnames)asfollows.
+SELECT case_id
+FROMTHIS_PROCESS
+WHEREevent_name MATCHES ('Close ticket' > 'Open Ticket')
+Note that THIS PROCESS is a context-dependent pointer to the process that is cur- rently in scope, e.g., in the context of a visual data analysis as executed through a graphical user interface by a business user.
+6 Recall that because R is a total order, 8a;b;c 2 R it holds that a  a (reflexivity), if a  b
+and b  c then a  c (transitivity), and if a  b and b  a then a = b, as well as a  b or b  a; note that we have a total order and not a total preorder, even in case of non-unique timestamps because the order is “burned in” based on the time-ordered sequence of events in the event log, with ties broken for non-unique timestamps.
+The MATCHESclause works as follows:
+    • The scope of a match is a case (i.e., a set of events) and not a single event, as specifiedby our behavioral matching function f .
+    • Our behaviors are implicitly defined by event name (a column name) which is then assigned the values ’Close ticket’ and ’Open ticket’. Behav-
+iors can be defined explicitly, by selecting events that satisfy specified constraints, as can be seen in the examples further below. Given the implicit definition, all events with the names ’Close ticket’ and ’Open ticket’, respectively,
+are matched.
+    • The temporal pattern matching operator > (directly or indirectly followed by)7 then matches cases in which behaviors with the specified temporal relationship occur. In this example, all cases in which an event for which event name = ’Close ticket’ holdsisindirectlyfollowedbyaneventforwhichevent name
+= ’Open ticket’ holds.
+Also, we want to identify cases in which tickets are closed although they are marked as “blocked” (instead of the expected status “done” that typically should be set when a ticket is closed). With SIGNAL, we can query this behavior (with some additional assumptions made about the provided attributes) as follows.
+SELECT case_id
+FROMTHIS_PROCESS
+WHERE(event_name = 'Close ticket' AND "status" = 'blocked')
+Finally, let us identify the cases in which blocked tickets are firstdirectly closed and then (eventually) re-opened. Here, we make use of the notion of behaviors. Note that arbitrary expressions (that return Boolean values) can be used to definea behaviors.
+SELECT case_id
+FROMTHIS_PROCESS
+WHEREBEHAVIOUR
+(event_name = 'Close ticket' AND "status" = 'blocked')) as closed_while_blocked
+MATCHES(closed_while_blocked > 'Open ticket')
+In our framework, we can then model the latter query as follows:
+    • The set of behaviors is B = fx;yg, where x represents closed while blocked and y represents events with the activity name “Open ticket”.
+    • The events in our case are E = fe0;:::;eng and we assume that they occur in a total order, ordered by index, i.e., we have a graph C = (E;R), where R = f(ei;ej )j0 i j ng(meaning(E;R) isequivalenttothesequencehe0;:::;eni).
+    • We have exactly one event e 2 E such that e is a ticket that has been closed while in status “blocked”; we have exactly two events e0;e00 2 E that have the activity name “Open ticket”: f = f(x; feg);(y;fe0;e00g)g. Let us assume that e0 e and e e00hold.
+7 > is more precisely explained below.
+    • The matching operator > (follows directly or indirectly) is then translated into the statement 9c 2 f (x);d 2 f (y) : c d. This is the case: e 2 f (x);e00 2 f (y);e e00. Hence, our query matches the case.
+Note that for any operator, matching is existential (and not universal), i.e., one match of behaviors is sufficient,as exemplifiedabove.
+Let us claim, based on well-established work, that using a single binary relation (R) for managing finitetraces is sufficientfor expressing linear temporal logic for finite traces [8]. Below, we assume a case C = (E;R) with a;b 2 E and a set of behaviors B with behaviors a0;b0 2 B such that a0 and b0 match unique events, i.e., we have a behavioral matching function f for which f (a0) = fag and f (b0) = fbg hold.
+The following row pattern matching operators are available.
+Directly followed by ( >). Two events that match the behavior directly follow each
+other. a0  > b0 matches our case iff a b and @c 2 E such that c 6= a, c 6= b, a c, and c bhold.
+Indirectly or directly followed by (>). Two events that match the behavior follow
+each other, directly or indirectly. As sketched above, a0 > b0 matches our case iff a bholds.
+Starts with (ˆ). An event that matches the behavior is the first event in the case. ˆ a0
+matches our case iff 8c 2 E n fag it holds that a c.
+Ends with ($). An event that matches the behavior is the last event in the case. a0 $
+matches our case iff 8c 2 E n fag it holds that c a.
+Contains any (ANY). Specifies that any event needs to occur. a0 ANYb0 matches our case iff 9c 2 E such that for some c0 2 B : c 2 f (c0) it holds that a0  > c0 and c0
+ > b0.
+Does not contain (NOT). Negates a behavioral match. For example, a0 NOTb0 matches
+our case iff 9c 2 E such that a c and @d 2 E such that d 6= a, d 6= c, a d and d c, and c 62f (b0).
+Or (j). Either of two behaviors occur. For example, ˆ (a0jb0) matches our case iff ˆ a0
+or ˆ b0 matches our case.
+Repetition (*). Specifies that a behavior occurs zero or more times. For example, a0
+ANY* b0 matches our case iff a0 > b0.
+Let us highlight that universal quantificationcan be achieved by negation. For example, if we want to express that behavior a0 should always be directly followed by behavior b0 we can stipulate this with the expression (ˆ (NOT a0 | (a0 b0)) $), which is
+then matched iff the whole sequence imposed by the total order on the events consists of anything that is not a0 , or a0 followed by b0., i.e., iff a0 occurs it is always directly followed by b0. Table 2 illustrates how the pattern matching operators work, assuming
+again a total order (sequence) of events and the behaviors and behavioral matching function from the example above.
+Figure 4 shows a query in which control flow constraints are specifiedusing regular expressionsforrowpatternmatching.Inparticular,theactivity“CreateOrder”mustoc- cur firstin the ordered (by timestamp) sequence of events for a particular case, followed (directly or indirectly) by “Create Order” , which in turn must be followed (directly or indirectly) by “Create Invoice”.
+Pattern Syntax
+Matching Sequence
+a0  > b0 a0 > b0 ˆ a0
+a0 $
+a0 ANYb0 a0 NOTb0 ˆ (a0jb0)
+a0 ANY* b0
+h:::;a;b;:::i h:::;a;:::;b;:::i ha;:::i
+h:::;ai
+h:::;a;c;b;:::i (given some event c 2 E)
+h:::;a;c:::i
+(given some event c 2 E : c 62f (b0))
+hc;:::i (given c 2 fa;bg)
+h:::;a;:::;b;:::i
+Table 2: Pattern matching operators and sequences (total orders) matched by th

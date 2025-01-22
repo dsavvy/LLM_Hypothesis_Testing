@@ -779,3 +779,17 @@ SELECT COUNT(case_id)
 FROM FLATTEN("defaultview-4")
 WHERE event_name MATCHES ('Review request' -> 'ParallelGateway')
 ```
+answer: 1. "The event 'Review request' always directly follows the event 'Credit requested'."
+```sql
+SELECT COUNT(CASE WHEN LAG(EVENT_NAME) OVER (PARTITION BY CASE_ID ORDER BY END_TIME) = 'Credit requested' AND EVENT_NAME != 'Review request' THEN 1 ELSE NULL END) AS violations
+FROM table_name
+```
+answer: 1. "The event 'Review request' always directly follows the event 'Credit requested'."
+```sql
+SELECT COUNT(case_id) 
+FROM "defaultview-4" 
+WHERE CASE 
+    WHEN event_name MATCHES ('Credit requested' -> 'Review request') THEN TRUE 
+    ELSE FALSE 
+END = TRUE
+```

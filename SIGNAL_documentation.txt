@@ -1,0 +1,920 @@
+﻿
+1  SAP Signavio Analytics Language
+Query language of SAP Signavio Process Intelligence optimized for performing process mining tasks on large amounts of event data
+SAP Signavio Analytics Language, SIGNAL is a specialized query language for process analysis.
+The language is based on SQL. Like SQL, you use queries to retrieve data and perform calculations on the data. However, it is not possible to change or delete process data.
+The difference to SQL is the data model. While you usually query data from multiple tables with SQL, SIGNAL queries the data from only one table, which contains nested events. In addition, SIGNAL provides numerous custom functions to work more effectively with this data structure.
+SIGNAL is optimized for process mining, for example to determine conformance, cycle times, and rework, and it supports exploration at scale by all kind of SAP Signavio Process Intelligence users.
+With SIGNAL, you can only retrieve data from processes to which you have access.
+Data model
+When mining the data of a process, you retrieve the data of a single table. This table contains the case
+attributes and their nested events and event attributes. The following table shows this nested structure.
+case_IDCustomer IDStatus City events
+1001 2001 delivered Berlin
+PaymentCancellation event_nameend_timemethodreason
+ 
+Receive cus- tomer order
+2020-07-01T 09:00:00
+
+Receive pay- ment
+2020-07-02T 10:00:00
+Bank trans- fer
+Ship goods
+2020-07-03T 11:00:00
+
+1002 2002 canceled
+PaymentCancellation event_nameend_timemethodreason
+ 
+Receive cus- tomer order
+2020-07-04T 13:00:00
+
+Cancel order
+2020-07-04T 14:00:00
+Wrong size
+The columns case_id, event_name and end_time are always present. Case attributes like Customer ID , Status, and City have the same value throughout the case. Additional event attributes, in this example Payment method and Cancellation reason can have different values for each event.
+There are two ways to iterate over this data:
+    • per case
+Each case is treated as one row. The nested events and event attributes are represented as a nested table.
+    • per event
+Each event is treated as one row. The case ID and case attributes are repeated for each event.
+Data types
+The data type of a column defines which value the column can hold. All data types can occur on case level as well as on event level (nested).
+SIGNAL supports the following data types:
+    • Strings
+    • Numbers stored as double precision floating point
+    • Timestamps stored with millisecond precision, without time zone information.
+    • Durations stored with millisecond precision
+    • Booleans
+All of these data types can appear in the source file and in the query result.
+Both case and event attributes can be Null, indicating the absence of a value or an unknown value.
+Process mining
+SIGNAL queries are used in the widgets of an investigation. When configuring widgets, you have the following options:
+    • Create you own queries
+    • Use the default queries in the widgets and customize them if necessary
+    • Use the predefined queries from the metrics library and customize them if necessary
+    • Add your own queries to the metrics library for reuse
+Read more on the widgets in section Widgets.
+    1.1 Syntax
+SIGNAL follows a specific syntax that is described throughout this documentation using a special notation.
+The syntax of SIGNAL is based on SQL but enhanced with functions to run in-depth process analysis queries. All queries always follow this basic structure:
+SELECT expressions FROM table/process WHERE conditions
+Example Example
+
+This query counts the cases in the declared table for which the condition is true.
+Syntax Notation
+The following notation is used to describe the syntax of SIGNAL. Note that this notation isn't part of the actual query:
+    • Angle brackets indicate a required element. Don't include the angle brackets as part of a query.
+Example: ORDER BY <expression>
+    • Square brackets indicate optional elements. Don't include the square brackets as part of a query. Example: [ WHERE <condition> ]
+    • The pipe symbol indicates a choice between two or more options. They're listed within square brackets (meaning inclusion of a choice is optional) or curly brackets (meaning one of the options must be chosen).
+Don't include the pipe or brackets as part of a query.
+Example: [ ASC | DESC ]
+Example: { AND | OR }
+    • An ellipsis indicates that the preceding element can be repeated an arbitrary number of times. Example: GROUP BY columnIndex [, columnIndex ...]
+Keywords
+SIGNAL keywords are case-insensitive, but are by convention written upper-case to distinguish them from expressions. Read more on keywords in SIGNAL keywords [page 285].
+Attribute Names
+Attribute names are case-insensitive. In the following cases, the attribute name must be enclosed in double quotes:
+    • The attribute shares the same name as a reserved SIGNAL keyword.
+    • The attribute doesn't start with a letter or an underscore.
+    • The attribute name contains characters other than letters, numbers, or underscores.
+    • If the attribute name is enclosed in double quotes, the entire expression must be enclosed in double quotes.
+Example: "Premium User" -> ""Premium User""
+    • If the attribute name contains one or more double quotes, these double quotes must be followed by a double quote.
+Example: Width in " (inches) -> "Width in "" (inches)"
+    • If the attribute name contains one or more single quotes, these single quotes must be followed by a double quote.
+Example: O'Reilly -> "O'"Reilly"
+Attribute Values
+Attribute values are, where applicable, case-sensitive. Attribute values of type String, Timestamp, and Duration must always be enclosed in single quotes.
+Semantic Attributes
+For SIGNAL, the following pre-defined semantic attributes are always present:
+    • case_id: Unique identifier of the case
+    • event_name: Event names of the case ordered by their time
+    • end_time: End timestamps of the events of a case
+The syntax rules for semantic attributes are the same as for the other attributes.
+    1.2 Aliases
+Learn about aliases in SIGNAL, the process mining query language of SAP Signavio Process Intelligence.
+Aliases are used to give the result set a temporary name to make the column headings in your result set easier to read. It's common to alias a column when using an aggregate function in a query. Without an alias, a name will be generated based on the column and operations in the expression. Read more in section SIGNAL functions [page 91].
+An alias is only valid within the scope of the SIGNAL statement. Syntax:
+expression AS alias_name
+Parameter Description Required expression The expression that you want to give a Required
+better name.
+alias_name The temporary name to assign. Required
+Enclose the name in double quotes if it contains a character that isn't a letter or digit.
+Example:
+In this example, we have the following data in a table:
+case_id event_name end_time 1001 Receive customer order 2020-07-01T09:00:00 1002 Receive customer order 2020-07-04T13:00:00 1003 Receive customer order 2020-07-05T11:00:00
+Enter the following SIGNAL statement:
+SELECT COUNT(case_id) AS "No. of cases" FROM THIS_PROCESS
+This query returns the following result set:
+No. of cases 3
+    1.3 SELECT Statement and Clauses
+Use the SELECT statement to select data from a process and return it in a result set.
+Syntax
+SELECT { <columnExpression> [FILTER (WHERE <condition>)] [, ...] | * } 
+FROM <tableExpression>
+[TABLESAMPLE EXACT( { <probability> PERCENT | <num> ROWS } ) [ REPEATABLE( <seed> ) ] ]
+[FILTER EVENTS WHERE <booleanExpression>]
+[WHERE <whereExpression>]
+[UNION ALL <selectStatement>]
+[GROUP BY <columnIndex> [, <columnIndex> ...] ]
+[ORDER BY <columnIndex> [ { ASC | DESC } ] [ NULLS { FIRST | LAST } ] [, ... ] ] [FILL <fillSpecification> [, <fillSpecification>, ...] ]
+[LIMIT <count>]
+[OFFSET <start>]
+Clause Description
+SELECT Specifies columns or values to be included in a result set.
+FROM Specifies the table in your process from which you want to retrieve the data. You
+can reference the process by using the explicit Process ID, which can be found on the API tab in the process settings page. Alternatively you can use the alias THIS_PROCESS to refer to the default view.
+TABLESAMPLE Specifies the absolute or percentage table fraction to be considered for the query. FILTER EVENTS Filters rows at event-level.
+WHERE Specifies the condition that must be met for cases to be selected. If this clause
+isn't provided, then all records are selected.
+UNION ALL Concatenates the result sets of two or more SELECT statements. GROUP BY Collects data across multiple records and groups the results by one or more
+columns. The GROUP BY clause requires an index similar to the ORDER BY clause. You can use one or multiple indices.
+Clause Description
+ORDER BY Sorts the records in the result set. If more than one index is provided, separate
+them with a comma.
+ASC sorts the result set in ascending order by expression, DESC sorts it in descending order.
+NULLS FIRST sorts the result set with null values first, NULLS LAST with null values last.
+FILL Fills any gaps inside a time series column by inserting new rows into the result
+set, each containing missing timestamps.
+LIMIT Specifies the number of records in the result set.
+OFFSET Specifies the starting point to return rows from a result set.
+Column Expressions
+The SELECT statement is used to structure the rows of your result set. Synt: ax
+SELECT <columnExpression> [, <columnExpression> ...] FROM <tableExpression>
+Each column expression specifies how to populate the values in that particular column.
+For example, you can select a column from the table referred to by tableExpression. Doing so populates your result set with the values from the specified column in the table.
+Example
+Let's assume we have the follow data (THIS_PROCESS):
+case_id Customer ID Status Order Quantity 1 C_1023 Received 1
+2 C_1198 Received 3
+3 C_1212 Dispatched 2
+SELECT "Customer ID" FROM THIS_PROCESS
+This query returns a result set with one column containing all the values from the process data's customer ID column:
+Customer ID C_1023 C_1198 Customer ID C_1212
+A column expression can also be a literal value. Such a value is repeated in that column for each row in the result set.
+Example
+SELECT case_id, 1 FROM THIS_PROCESS
+This query creates a result set with two columns. The first column is populated with the values from case_id in THIS_PROCESS. The second column is populated with the literal value 1.
+case_id 1 1 1 2 1 3 1
+You can also create column expressions by combining values, column names, operators or function calls.
+Example
+SELECT "Customer ID", "Order Quantity" + 1 FROM THIS_PROCESS
+In this query, the result set's second column is populated with the values from the Order Quantity column in THIS_PROCESS, but in each case that value is increased by 1.
+Customer ID "Order Quantity" + 1
+ 
+C_1023
+2
+C_1198
+4
+C_1212
+3
+Selecting All Columns From a Process
+You can use the * operator in a SELECT statement to select all columns of a table under the following conditions:
+    • The query contains multiple SELECT statements.
+    • At least one of those SELECT statements references an explicit list of columns.
+Example
+SELECT case_id,
+    "Customer ID",
+    "Order Quantity" FROM (
+    SELECT *            FROM THIS_PROCESS ) AS sub
+This query uses a subquery to select all columns from THIS_PROCESS. From them, the outer query then selects an explicit subset of columns:
+case_id Customer ID Order Quantity 1 C_1023 1
+2 C_1198 3
+3 C_1212 2
+Including Clauses
+When building a SIGNAL query, add any of the optional clauses in the order they appear in the syntax.
+Example
+SELECT case_id, "Customer ID", "Order Quantity" FROM table
+ORDER BY 3 DESC
+LIMIT 2
+This query returns the case ID, customer ID and order quantity of the first 2 cases in the table. The clause ORDER BY 3 DESC orders the result set by the third column in descending order.
+case_id Customer ID Order Quantity 2 C_1198 3
+3 C_1212 2
+Related Information
+Subqueries [page 49]
+1.3.1SELECT DISTINCT Clause
+Modifies the SELECT statement so that it returns only unique values of a specified column. If NULL values are present in a column, then NULL appears in the result set.
+Note
+This function isn't supported in subqueries.
+Syntax
+SELECT DISTINCT <expression>
+Parameter Description
+expression The column, expression, or event-attribute that is returned.
+If more than one expression is provided, separate the values with a comma.
+table The process table or view from which you want to retrieve
+data. It's referenced by explicit Process ID or the alias THIS_PROCESS.
+Example 1
+Assume the following process data (THIS_PROCESS):
+case_id city event_name 00007 San Francisco Receive Customer Order
+Receive Payment
+Send items to Printing Items Printed
+Receive items from Printing Ship Goods Standard
+00008 Houston Receive Customer Order
+Change Order Quantity Receive Payment
+Ship Goods Express
+Receive Delivery Confirmation
+case_id city event_name 00009 Miami Receive Customer Order
+Receive Payment
+Receive Payment
+Ship Goods Express
+Receive Delivery Confirmation
+00010 Houston Receive Customer Order
+Change Order Quantity Receive Payment
+Ship Goods Express
+Receive Delivery Confirmation
+The following query selects all cities in the process data but excludes duplicate values, meaning every city name appears only once. The resulting cities are then sorted alphabetically.
+SELECT DISTINCT city FROM THIS_PROCESS ORDER BY 1 ASC
+Output:
+city Houston Miami
+San Francisco
+Example 2
+Assuming the same process data as the previous example, the goal is to find all unique event name sequences (variants) in your process.
+SELECT DISTINCT event_name FROM THIS_PROCESS
+The query is executed at the case level, meaning that each event name sequence is treated as a list of strings. Two sequences are considered equal if they share the same event names in the same order. Duplicate values are removed from the result set, so every variant appears only once.
+Running the query produces the following output (notice how the events of cases 00008 and 00010, being equal, appear only once):
+event_name Receive Customer Order
+Receive Payment
+Receive Payment
+Ship Goods Express
+Receive Delivery Confirmation
+Receive Customer Order Change Order Quantity Receive Payment
+Ship Goods Express
+Receive Delivery Confirmation
+Receive Customer Order Receive Payment
+Send items to Printing
+Items Printed
+Receive items from Printing Ship Goods Standard
+Receive Delivery Confirmation
+Example 3
+In this example, the goal is to retrieve only unique event names in your process. Unlike the previous example, we need to consider individual event names rather than event name sequences. To do this, we FLATTEN the process data, representing each nested event as a single row containing case and event attributes.
+SELECT DISTINCT event_name FROM FLATTEN (THIS_PROCESS) ORDER BY 1 ASC
+Duplicate values are then removed from the result set as a whole, meaning every event name appears only once.
+Output:
+event_name Receive Customer Order Receive Payment
+Items Printed
+Receive Delivery Confirmation Ship Goods Express
+Change Order Quantity
+Ship Goods Standard
+Receive items from Printing Send items to Printing
+Related Information
+FLATTEN Operator [page 44]
+1.3.2FROM Clause
+Specifies the table in your process from which you want to retrieve data.
+THIS_PROCESS is the alias assigned to the table set as the process view inside the process analysis, such as in a dashboard. The process view selected therefore serves as the underlying data source for all references to THIS_PROCESS inside a query.
+Syntax
+FROM <table>
+Parameter Description
+table The process table or view from which you want to retrieve
+records.
+You can reference the process by using the explicit Process ID, which can be found on the API tab in the process settings page. Alternatively, you can use the alias THIS_PROCESS to refer to the default view.
+Example
+Assume the following process data:
+case_id City Payment Type 00001 Houston Bank Transfer 00002 San Francisco Credit Card 00005 Houston Credit Card 00009 Miami Credit Card 00012 San Francisco Credit Card 00017 New York Bank Transfer 00018 Washington Credit Card 00019 San Francisco Credit Card 00022 San Francisco Credit Card 00026 Boston Bank Transfer
+The following query retrieves a list of the unique cities in your process data. By referring to the source table as THIS_PROCESS, it fetches data from the process view selected in the process analysis.
+SELECT DISTINCT city FROM THIS_PROCESS
+Output:
+City
+Boston
+New York San Francisco Houston Washington Miami
+Related Information
+Changing the Process View Creating Process Views
+1.3.3WHERE Clause
+Filters the data by applying conditions to the SELECT statement. Only rows matching the condition are included in the result set.
+Syntax
+WHERE <condition>
+Parameter Description
+condition The Boolean expression that a row must match is included in
+the result set.
+The following is a non-exhaustive list of common operators used in a WHERE condition:
+Symbols
+    • (greater than)
+    • (less than)
+>= (greater than or equal to) <= (less than or equal to)
+    • (equal to)
+!= (not equal to)
+Example 1
+Assume the following process data (THIS_PROCESS):
+case_id City Order AmountOrder Status 00001 Houston 944.42 Delivered 00002 San Francisco 270.04 Canceled 00003 Houston 469.9 Delivered 00004 San Francisco 268.34 Delivered 00005 Houston 327.94 Delivered 00006 San Francisco 599.07 Delivered 00007 San Francisco 521.17 Delivered 00008 Houston 162.58 Delivered case_id City Order AmountOrder Status 00009 Miami 165.44 Delivered 00010 Houston 319.18 Delivered
+The following query retrieves the total order amount from purchases made in San Francisco. Only order amounts from rows matching the WHERE condition are counted.
+SELECT SUM("Order Amount") FROM THIS_PROCESS
+WHERE("City" = 'San Francisco')
+Output:
+SUM(Order Amount) 1658.62
+Example 2
+Assume the same process data as the previous example. The following query finds all rows where both city and order status match the condition.
+SELECT case_id, 
+    "City",
+    "Order Amount",
+    "Order Status"
+FROM THIS_PROCESS
+WHERE "City" = 'San Francisco' AND "Order Status" = 'Delivered'
+The query returns the following result.
+case_id City Order AmountOrder Status 00004 San Francisco 268.34 Delivered 00006 San Francisco 599.07 Delivered 00007 San Francisco 521.17 Delivered
+Related Information
+FILTER EVENTS Clause [page 22] SUM [page 129]
+1.3.4FILTER Clause
+The FILTER clause is used to filter data inside aggregations. This lets you include or exclude specific cases or events from aggregations in your query.
+Syntax
+FILTER (WHERE <condition>)
+Parameter Description
+condition A Boolean expression. Only cases or events for which this
+expression evaluates to true are included in the aggregation.
+Example 1
+Assuming the following process data (THIS_PROCESS):
+case_id City event_name end_time 00001 Houston Receive Customer Order 01/08/2020, 12:32
+Change Order Quantity 02/08/2020, 03:19 Receive Payment 04/08/2020, 16:47 Ship Goods Express 05/08/2020, 09:57 Receive Delivery Confirma- 09/08/2020, 09:19
+tion
+00002 San Francisco Receive Customer Order 06/04/2020, 06:38 Receive Payment 07/04/2020, 22:36
+Send items to Printing 08/04/2020, 17:26 Order Canceled 09/04/2020, 23:43
+00003 Houston Receive Customer Order 21/02/2020, 09:14
+Change Order Quantity 22/02/2020, 16:12 Receive Payment 26/02/2020, 06:51 Ship Goods Standard 28/02/2020, 18:00 Receive Delivery Confirma- 02/03/2020, 20:15
+tion
+case_id City event_name end_time 00004 San Francisco Receive Customer Order 09/10/2020, 19:26
+Change Order Quantity 10/10/2020, 15:16 Receive Payment 14/10/2020, 04:27 Ship Goods Express 14/10/2020, 12:40 Receive Delivery Confirma- 16/10/2020, 02:45
+tion
+00005 Miami
+Receive Customer Order Change Order Quantity Change Order Quantity Receive Payment
+Send items to Printing Items Printed
+Receive items from Printing Ship Goods Express
+Receive Delivery Confirma- tion
+25/12/2020, 18:21 27/12/2020, 02:13 27/12/2020, 19:04 29/12/2020, 23:55 30/12/2020, 23:46 03/01/2021, 06:18 05/01/2021, 19:07 06/01/2021, 01:14 07/01/2021, 01:24
+The following query counts the number of orders to the cities of Houston and Miami:
+SELECT COUNT(case_id) FILTER (WHERE city in ('Houston', 'Miami')) as "Count" FROM THIS_PROCESS
+Result:
+Count 3
+Example 2
+Assuming the same process data as the previous example, the following query finds cases where the receipt of an order was followed directly by the order quantity being changed:
+SELECT COUNT(case_id) FILTER (WHERE event_name MATCHES ('Receive Customer Order' -> 'Change Order Quantity')) as "Updated Quantity"
+FROM THIS_PROCESS
+Updated Quantity 4
+Example 3
+The following query finds the duration between two events: first receipt of an order and completion of payment for that order. It does this by executing an event-level subquery, querying event-level data. In obtaining the timestamp of the final payment, only events named 'Receive Payment' are included by the filter. Because an order may include multiple payments, LAST is applied to the resulting aggregation to obtain the latest timestamp.
+Similarly, the timestamp of the first event named 'Receive Customer Order' is queried. The difference between the two timestamps gives the cycle time from order receipt to payment. (See Cycle Time Between Two Specific Events [page 313] for more information.)
+SELECT
+    case_id,
+    (SELECT LAST(end_time) FILTER (WHERE event_name = 'Receive Payment') -         FIRST(end_time) FILTER (WHERE event_name = 'Receive Customer Order')     ) AS PaymentTurnaround
+FROM THIS_PROCESS
+Result when applied to the example process data:
+case_id PaymentTurnaround 00001 3d 4h
+00002 1d 15h
+00003 4d 21h
+00004 4d 9h
+00005 4d 5h
+Related Information
+Aggregate Functions [page 92]
+Cycle Time Between Two Specific Events [page 313] Event-Level Subqueries [page 52]
+1.3.5FILTER EVENTS Clause
+Filter data from a result set at event-level.
+This clause evaluates a given boolean expression on the event attributes and removes from the result set those which evaluate to false. This stands in contrast to the WHERE statement, which removes entire cases from a result set.
+Note
+Because this clause removes events rather than entire cases, it's possible for a result set to include cases with empty event lists. Refer to Example 3 [page 26] for a demonstration of how to remove such cases from a result set.
+Syntax
+FILTER EVENTS WHERE <booleanExpression>
+Parameter Description
+booleanExpression The condition that an event must match to achieve inclusion
+in the filtered result set.
+Restriction
+MATCHES and BEHAVIOR MATCHES expressions can't be nested. Consequently, these expressions can't be used in the booleanExpression of a FILTER EVENTS clause.
+Clause Evaluation Order
+If a query contains both a FILTER EVENTS clause and a WHERE clause, the FILTER EVENTS clause is evaluated before the WHERE clause. Having this evaluation order enables the elimination of particular events before cases as a whole are filtered further. Example 4 demonstrates this behavior.
+The expressions defined in the FILTER EVENTS and WHERE clauses are evaluated after the FROM clause. Consequently, using event-level filtering in combination with the FLATTEN operator isn't possible because flattening transforms all event-level columns to case level.
+Tip
+As an alternative, you can use event-level filtering in a subquery and then flatten the result.
+Referencing Case and Event-Level Attributes
+The booleanExpression can reference both case and event-level attributes. Refer to Example 2 for a demonstration.
+Usage of the FILTER EVENTS clause requires that an event-level attribute appears in at least one of the following (otherwise, an error is returned):
+    • The set of columns selected as part of the query or subquery
+    • A follow-up operator, such as a WHERE clause
+Example 1
+Given the following data (THIS_PROCESS):
+case_id Order AmountEvent Name Payment Amount 00007 521.17 Receive Customer Order null
+Receive Payment 521.17 Send items to Printing null Items Printed null Receive items from Printing null Ship Goods Standard null Receive Delivery Confirma- null
+tion
+00008 162.58 Receive Customer Order null
+Change Order Quantity null Receive Payment 162.58 Ship Goods Express null Receive Delivery Confirma- null
+tion
+00009 165.44 Receive Customer Order null
+Receive Payment 126.44 Receive Payment 39 Ship Goods Express null Receive Delivery Confirma- null
+tion
+00010 319.18 Receive Customer Order null
+Change Order Quantity null Receive Payment 319.18 Ship Goods Express null Receive Delivery Confirma- null
+tion
+The following query filters out all events where the payment amount is greater than 300.
+SELECT
+    case_id,
+    "Order Amount",
+    event_name,
+    "Payment Amount"
+FROM "THIS_PROCESS"
+FILTER EVENTS WHERE "Payment Amount" > 300
+Output:
+case_id Order Amountevent_name Payment Amount 00007 521.17 Receive Payment 521.17 00008 162.58
+00009 165.44
+00010 319.18 Receive Payment 319.18 Notice how cases 00008 and 00009 have empty event lists since they have no events fulfilling the FILTER
+EVENTS condition.
+Example 2
+Using the same process data as the previous example, the following query demonstrates how both case and event-level attributes can be included in a FILTER EVENTS clause.
+SELECT
+    case_id,
+    "Order Amount",
+    event_name,
+    "Payment Amount"
+FROM "THIS_PROCESS"
+FILTER EVENTS WHERE "Payment Amount" < "Order Amount"
+As the example data shows, all orders were paid for in one complete payment with the exception of case '00009', which was paid for in two smaller installments. Therefore, this query filters out all events except the payment-related events of case '00009'.
+case_id Order Amountevent_name Payment Amount 00007 521.17
+00008 162.58
+00009 165.44 Receive Payment 126.44
+Receive Payment 39
+00010 319.18
+Example 3
+Event-level filtering can leave behind cases with empty event lists. To filter out such cases, combine the FILTER EVENTS clause with a WHERE clause as in the following query (which adapts the query from Example 2):
+SELECT
+    case_id,
+    "Order Amount",
+    event_name,
+    "Payment Amount"
+FROM "THIS_PROCESS"
+FILTER EVENTS WHERE "Payment Amount" < "Order Amount" -- Eliminate empty event lists
+WHERE (SELECT COUNT(event_name) > 0)
+This method takes advantage of every event automatically having an event_name attribute. Event lists featuring no event_name can therefore be considered as empty.
+case_id Order Amountevent_name Payment Amount 00009 165.44 Receive Payment 126.44
+Receive Payment 39
+Example 4
+Again using the process data from Example 1, this query further demonstrates combining the FILTER EVENTS and WHERE clauses.
+SELECT
+    case_id,
+    "Order Amount",
+    event_name,
+    "Payment Amount"
+FROM "THIS_PROCESS"
+FILTER EVENTS WHERE event_name IN ('Receive Customer Order', 'Receive Payment', 'Receive Delivery Confirmation')
+WHERE event_name MATCHES (^'Receive Customer Order' -> 'Receive Payment' -> 'Receive Delivery Confirmation')
+The FILTER EVENTS clause keeps only those events named 'Receive Customer Order', 'Receive Payment', or 'Receive Delivery Confirmation'. The containing cases are filtered further by the WHERE clause, which uses a matching expression. Only cases whose event lists follow an expected pattern are kept,
+that pattern being:
+    1. Receiving an order
+    2. Receiving a single payment
+    3. Receiving delivery confirmation
+All cases follow this pattern apart from case '00009', which, as earlier examples showed, involves multiple payments.
+case_id Order Amountevent_name Payment Amount 00007 521.17 Receive Customer Order null
+Receive Payment 521.17 Receive Delivery Confirma- null
+tion
+00008 162.58 Receive Customer Order null
+Receive Payment 162.58 Receive Delivery Confirma- null
+tion
+00010 319.18 Receive Customer Order null
+Receive Payment 319.18 Receive Delivery Confirma- null
+tion
+Related Information
+FLATTEN Operator [page 44] Matching Expressions [page 80] WHERE Clause [page 18]
+1.3.6GROUP BY Clause
+Groups rows by one or more columns and computes aggregate functions for each group.
+Columns are referred to by a number, which reflects their position in the SELECT clause. For example, GROUP BY 2 groups the result by the second expression in the SELECT clause. All rows that share the same values for the grouped expression are condensed into a single row.
+Syntax
+GROUP BY <columnIndex> [, ...]
+Parameter Description
+columnIndex The position in SELECT clause of the column being grouped
+by. The indexing is 1-based, so the first column has position 1.
+Remember
+In a GROUP BY clause, you can't refer to columns by their name.
+Grouping and Aggregations
+The GROUP BY clause is often used with aggregate functions, such as COUNT, MAX, or AVG. The aggregate function is computed across all rows of each group and returns a separate value for each group. To specify the rows to be considered for the aggregation, you can apply the FILTER clause to the aggregate function.
+The GROUP BY clause is optional. If the GROUP BY clause isn't present, then the following applies:
+    • If there are aggregate and non-aggregate expressions in the SELECT statement, then the result is automatically grouped by any non-aggregate expressions.
+    • If there are only aggregate expressions in the SELECT statement, then the result is a single group comprising all the selected rows.
+If the GROUP BY clause is present, then the following applies:
+    • You must group by all expressions in the SELECT statement that aren't encapsulated by an aggregate function. Exception: The ungrouped expression is functionally dependent on a grouped expression (see
+Example 2). • You can't group by an expression that contains an aggregate function.
+Grouping by Events
+If a case-level attribute is chosen for the grouping, the result set is grouped according to the values present in that attribute. If an event-level attribute is chosen, the result set is grouped by the list of identical sequences of events. This approach can be used to identify process variants.
+Example 1
+Assume the following process data (THIS_PROCESS):
+case_id City Order AmountOrder StatusOrder Quantity 00001 Houston 944.42 Delivered 17 case_id City Order AmountOrder StatusOrder Quantity 00002 San Francisco 270.04 Canceled 10 00003 Houston 469.9 Delivered 15 00004 San Francisco 268.34 Delivered 17 00005 Houston 327.94 Delivered 18 00006 San Francisco 599.07 Delivered 10 00007 San Francisco 521.17 Delivered 8 00008 Houston 162.58 Delivered 19 00009 Miami 165.44 Delivered 18 00010 Houston 319.18 Delivered 10
+SELECT 
+    "City", 
+    "Order Status",
+    COUNT(case_id) AS "No. of Cases" FROM THIS_PROCESS
+GROUP BY 1, 2
+The GROUP BY clause in this query groups by the two expressions in the SELECT statement that aren't encapsulated by an aggregation function. Since this SELECT statement contains two such expressions ('City' and 'Order Status'), the GROUP BY index must refer to both expressions. GROUP BY 1 or GROUP BY 2 wouldn't be valid in this case.
+The query produces the following output:
+City Order Status No. of Cases Miami Delivered 1
+San Francisco Delivered 3
+Canceled 1
+Houston Delivered 5
+Example 2
+Assume the same process data as the previous example. The following query groups orders by order size and counts how many of each size there are. It also includes in each group that order quantity incremented.
+SELECT 
+    "Order Quantity", 
+    ("Order Quantity" + 1) AS "Orders + 1",     COUNT(case_id) AS "No. of Cases"
+FROM THIS_PROCESS
+GROUP BY 1
+Since the second expression, ("Order Quantity" + 1), is functionally dependent on the first column, "Order Quantity", GROUP BY 1 is valid in this case. There is no need to include the second column in the grouping.
+The query returns the following result.
+Order Quantity Orders + 1 No. of Cases
+ 
+8
+9
+1
+10
+11
+3
+15
+16
+1
+17
+18
+2
+18
+19
+2
+19
+20
+1
+Related Information
+Aggregate Functions [page 92] FILTER Clause [page 20]
+1.3.7ORDER BY Clause
+Sorts the result set in ascending or descending order.
+Caution
+For very large data sets, this operator may require excessive CPU activity, causing long query execution times.
+For more information, refer to Performance [page 291].
+Syntax
+ORDER BY <columnIndex> [ { ASC | DESC } ] [ NULLS { FIRST | LAST } ] [, ... ] Parameter Description
+columnIndex The index of a column used to sort the records in the result
+set. If more than one expression is provided, separate the values with a comma.
+The index is 1-based, meaning that the first column is refer- red to as 1.
+Additional keywords can be added to influence the sorting:
+    • The direction of sorting: ASC sorts the column in ascending order. DESC sorts it in descending order. If neither keyword is specified, the default sorting is ascending.
+    • The position of NULL values: NULLS FIRST sorts a column so that NULL values are presented first. NULLS LAST sorts a column so that NULL values are presented last. If neither is specified, the default position is
+NULLS FIRST.
+Example
+Assume the following process data (THIS_PROCESS):
+case_id City Order AmountOrder StatusOrder Quantity 00001 Houston 944.42 Delivered 17 00002 San Francisco 270.04 Canceled 10 00003 Houston 469.9 Delivered 15 00004 San Francisco 268.34 Delivered 17 00005 Houston 327.94 Delivered 18 00006 San Francisco 599.07 Delivered 10 00007 San Francisco 521.17 Delivered 8 00008 Houston 162.58 Delivered 19 00009 Miami 165.44 Delivered 18 00010 Houston 319.18 Delivered 10
+SELECT 
+    case_id,
+    "City",
+    "Order Amount",     "Order Status",     "Order Quantity" FROM THIS_PROCESS ORDER BY 3 DESC
+This query returns cases in the process sorted by the order amount (column number 3) in descending order.
+case_id City Order AmountOrder StatusOrder Quantity 00001 Houston 944.42 Delivered 17 00006 San Francisco 599.07 Delivered 10 00007 San Francisco 521.17 Delivered 8 00003 Houston 469.9 Delivered 15 00005 Houston 327.94 Delivered 18 00010 Houston 319.18 Delivered 10 case_id City Order AmountOrder StatusOrder Quantity 00002 San Francisco 270.04 Canceled 10 00004 San Francisco 268.34 Delivered 17 00009 Miami 165.44 Delivered 18 00008 Houston 162.58 Delivered 19
+1.3.8FILL Clause
+The FILL clause fills any gaps inside a time series column. It does so by inserting new rows into the result set, each containing missing timestamps.
+As part of the fill, the precision must be specified. Assume, for example, you specify a precision level of 'day'. If the time series column contains the values 'Mon, 4th September 2023' and 'Thu, 7th September 2023' with no intervening values, then two rows would be inserted containing the missing dates ('Tue, 5th September 2023' and 'Wed, 6th September 2023') in the time series column.
+This precision level is part of a larger fill specification you need to provide, which instructs SIGNAL how to populate the columns in all inserted rows.
+Syntax
+SELECT <columnExpression> [, <columnExpression> ...] FROM <tableExpression>
+FILL <fillSpecification> [, <fillSpecification >... ]
+Parameter Description
+columnExpression A column or value to be selected.
+tableExpression The process table or view from which you want to retrieve
+records, referenced by explicit Process ID or the alias THIS_PROCESS.
+fillSpecification A fill specification for the corresponding column expression.
+Note
+The number of fill specifications provided must equal the number of columns selected. Under certain circum- stances, missing specifications are added automatically. See Writing Fill Specifications [page 33] for more infor- mation.
+A fill specification takes one of the following values:
+    • TIMESERIES(<precision>): Defines the precision of the filling, determining with what regularity missing entries are filled in the time series. Exactly one fill specification must be a TIMESERIES. The precision parameter accepts a string literal specifying the precision level. The following levels are supported:
+        ◦ 'year'
+        ◦ 'quarter'
+        ◦ 'month'
+        ◦ 'week' (ISO 8601-week numbering is applied)
+        ◦ 'day'
+        ◦ 'hour'
+    • GROUP: In the corresponding column, newly added rows are filled by repeating the same value for the whole group. A fill specification can include at most one GROUP. Learn more in the following section, Using
+GROUP [page 34]. • NULL: Enters a NULL value into the corresponding column for all new rows.
+Each fill specification matches with the column at the same index. In other words, the first specification in the FILL clause corresponds to the first column in the SELECT clause, the second specification corresponds to the second column, and so on.
+SELECT
+    col1,
+    col2,
+    col3
+FROM THIS_PROCESS
+FILL
+    TIMESERIES('day'), -- corresponds to col1     GROUP,             -- corresponds to col2     NULL               -- corresponds to col3
+Each column must have a fill specification. Any specifications you fail to provide are assumed to be of type NULL and implicitly added to the end of the FILL clause. Therefore, the following query is equivalent to the previous query:
+SELECT
+    col1,
+    col2,
+    col3
+FROM THIS_PROCESS
+FILL
+    TIMESERIES('day'),
+    GROUP
+    -- NULL added here implicitly
+However, if a NULL specification falls between TIMESERIES and GROUP specifications, then the NULL specification must be added explicitly.
+SELECT
+    col1,
+    col2,
+    col3
+FROM THIS_PROCESS
+FILL
+    TIMESERIES('day'),     NULL,
+    GROUP
+Using GROUP
+The FILL clause isn't only useful for filling missing timestamps in the overall result set. It can also group the values in a specified column and then add rows containing all missing timestamps to each group.
+Remember
+At most one column can be specified as a GROUP in a FILL clause. Example
+Assume we have the following process data (THIS_PROCESS):
+City Customer Type Received Boston Standard 2020-01-01 New York Premium 2020-01-02 San Francisco Standard 2020-01-04
+If we fill the time series with missing dates without specifying a GROUP column, then the missing dates are added independently of the other columns. The newly added rows would therefore be populated with NULL values in all other columns.
+SELECT 
+    Received,
+    City,
+    "Customer Type" FROM THIS_PROCESS FILL TIMESERIES('day')
+This query returns the following output:
+
+By specifying 'City' as a group, all missing dates are added for each group of cities. Within each group, the value of 'City' is repeated for each inserted row.
+SELECT 
+    Received,
+    City,
+    "Customer Type"
+FROM THIS_PROCESS
+FILL TIMESERIES('day'), GROUP
+This query returns the following output:
+
+Using GROUP BY and ORDER BY
+The GROUP BY clause is applied after the filling. It's not related to the GROUP fill specification.
+The FILL clause influences the definition and output of the ORDER BY clause. The FILL clause returns the filled time series for each group (as defined by the GROUP specification) in ascending order. Consequently, in the ORDER BY clause, the group column must be followed by the ascending time series column (as defined by TIMESERIES(<precision>)).
+Note
+If no ORDER BY is provided, the output is first grouped by the GROUP specified column and then by the TIMESERIES specified column.
+Example
+This example builds a query for showing the types of orders received on a daily basis. An overview of every day should be shown but not every type of order is sold every day, so we use FILL to fill any gaps. There are two types of customer: 'Standard' and 'Premium'.
+SELECT
+    DATE_TRUNC('day', (SELECT FIRST(end_time))) AS "Date",     "Customer Type"
+FROM THIS_PROCESS
+GROUP BY 1, 2
+Result:
+Date Customer Type 01/01/2020 Standard 02/01/2020 Premium 02/01/2020 Standard 03/01/2020 Premium 03/01/2020 Standard 04/01/2020 Premium 04/01/2020 Standard
+As the output shows, no premium customers made orders on 1 January.
+The next step is to add extra rows for each missing order type on each day. Specifically, we group the values in the 'Customer Type' column into two groups and then add new rows for the missing days within each group. The value for the 'Customer Type' column in the new rows takes the value of the current group.
+To do that, add a FILL clause. TIMESERIES('day') identifies the first column as the time series. GROUP identifies 'Customer Type' as the group column.
+SELECT
+    DATE_TRUNC('day', (SELECT FIRST(end_time))) AS "Date",     "Customer Type"
+FROM THIS_PROCESS
+GROUP BY 1, 2
+FILL
+    TIMESERIES('day'),
+    GROUP
+Result:
+Date Customer Type 01/01/2020 Premium 02/01/2020 Premium 03/01/2020 Premium 04/01/2020 Premium Date Customer Type 05/01/2020 Premium 06/01/2020 Premium 07/01/2020 Premium 01/01/2020 Standard 02/01/2020 Standard 03/01/2020 Standard 04/01/2020 Standard 05/01/2020 Standard 06/01/2020 Standard 07/01/2020 Standard
+Finally, we select the number of orders for each group on each date. The corresponding fill specification is NULL, meaning that column is filled with null values in the new rows.
+SELECT
+    DATE_TRUNC('day', (SELECT FIRST(end_time))) AS "Date",     "Customer Type",
+    COUNT(case_id)
+FROM THIS_PROCESS
+GROUP BY 1, 2
+FILL
+    TIMESERIES('day'),
+    GROUP,
+    NULL
+The result shows the number of each order type on a daily basis:
+Date Customer Type COUNT(case_id) 01/01/2020 Standard 4
+Premium
+02/01/2020 Standard 6
+Premium 4
+03/01/2020 Standard 7
+Premium 1
+04/01/2020 Standard 5
+Premium 4
+05/01/2020 Standard 8
+Premium 7
+06/01/2020 Standard 11
+Premium 4
+07/01/2020 Standard 3
+Date Customer Type COUNT(case_id)
+Premium 4
+Related Information
+COUNT [page 104] DATE_TRUNC [page 172] FIRST [page 109]
+1.3.9LIMIT Clause
+Specifies the number of rows to return in a result set.
+Without a LIMIT clause, the result set is limited to 500 rows by default.
+Tip
+This clause is often used together with the ORDER BY clause, as demonstrated in the example.
+Syntax
+LIMIT <count>
+Parameter Description
+count The number of rows to include in the result set.
+Example
+Assume the following process data (THIS_PROCESS):
+case_id City Order AmountOrder StatusOrder Quantity 00001 Houston 944.42 Delivered 17 00002 San Francisco 270.04 Canceled 10 00003 Houston 469.9 Delivered 15 00004 San Francisco 268.34 Delivered 17 case_id City Order AmountOrder StatusOrder Quantity 00005 Houston 327.94 Delivered 18 00006 San Francisco 599.07 Delivered 10 00007 San Francisco 521.17 Delivered 8 00008 Houston 162.58 Delivered 19 00009 Miami 165.44 Delivered 18 00010 Houston 319.18 Delivered 10
+The following query returns the top five largest orders by quantity. It does so by sorting by 'Order Quantity' (the fifth column) in descending order and limiting the result set to five rows.
+SELECT 
+    case_id,
+    "City",
+    "Order Amount",     "Order Status",     "Order Quantity" FROM THIS_PROCESS ORDER BY 5 DESC LIMIT 5
+Output:
+case_id City Order AmountOrder StatusOrder Quantity 00008 Houston 162.58 Delivered 19 00005 Houston 327.94 Delivered 18 00009 Miami 165.44 Delivered 18 00001 Houston 944.42 Delivered 17 00004 San Francisco 268.34 Delivered 17
+Related Information
+ORDER BY Clause [page 30]
+1.3.10TABLESAMPLE Clause
+Learn about the TABLESAMPLE clause in SIGNAL, the process mining query language of SAP Signavio Process Intelligence.
+With the TABLESAMPLE clause, you can specify either the absolute or percentage table fraction to be considered for the query. The table fraction is sampled randomly after the FROM clause is evaluated and before all other clauses.
+Syntax
+TABLESAMPLE EXACT( { <probability> PERCENT | <num> ROWS } ) [ REPEATABLE( <seed> ) ]
+Parameter Description
+probability Percentage probability for selecting the sample. Any integer
+between 0 (no rows selected) and 100 (all rows selected) inclusive.
+num Number of rows to sample from the table
+seed Used for generating random numbers for the sampling
+method.
+Example
+SELECT "Order Amount in EUR", "Duration Order To Payment"
+FROM (
+    SELECT
+        "Order Amount in EUR",
+        (SELECT LAST (end_time) FILTER (WHERE event_name = 'Receive Payment')) -         (SELECT FIRST (end_time) FILTER (WHERE event_name = 'Receive Customer Order')) AS "Duration Order To Payment"
+    FROM THIS_PROCESS
+    WHERE
+        ("Order Amount in EUR" IS NOT NULL)
+    AND
+        ((SELECT LAST (end_time) FILTER (WHERE event_name = 'Receive Payment')) -         (SELECT FIRST (end_time) FILTER (WHERE event_name = 'Receive Customer Order'))
+        IS NOT NULL)
+) AS sub_query
+TABLESAMPLE EXACT(10 ROWS) REPEATABLE(123)
+This query returns 10 rows sampled randomly from the specified table.
+
+For TABLESAMPLE EXACT(10 PERCENT) REPEATABLE(123), the query returns 10 percent of the rows sampled randomly from the specified table.
+
+1.3.11OFFSET Clause
+Specifies the starting point to return rows from a result set.
+The starting point is determined by providing the number of rows to skip from the top of the table. An offset of N rows means that a result set begins from the (N+ )th1 row.
+Remember
+For OFFSET to provide consistent results, you must add an ORDER BY clause to the query.
+Syntax
+OFFSET <number>
+Parameter Description
+number The number of rows to skip from the top of the table.
+Example
+Assume the following process data (THIS_PROCESS):
+case_id City Order AmountOrder StatusOrder Quantity 00001 Houston 944.42 Delivered 17 00002 San Francisco 270.04 Canceled 10 00003 Houston 469.9 Delivered 15 00004 San Francisco 268.34 Delivered 17 00005 Houston 327.94 Delivered 18 00006 San Francisco 599.07 Delivered 10 00007 San Francisco 521.17 Delivered 8 00008 Houston 162.58 Delivered 19 00009 Miami 165.44 Delivered 18 00010 Houston 319.18 Delivered 10
+The following query sorts the result set by order amount and skips the first four rows.
+SELECT 
+    case_id,
+    "City",
+    "Order Amount",     "Order Status",     "Order Quantity" FROM THIS_PROCESS ORDER BY 3
+OFFSET 4
+Consequently, the four lowest value orders are excluded from the result set.
+case_id City Order AmountOrder StatusOrder Quantity 00010 Houston 319.18 Delivered 10 00005 Houston 327.94 Delivered 18 00003 Houston 469.9 Delivered 15 00007 San Francisco 521.17 Delivered 8 00006 San Francisco 599.07 Delivered 10 00001 Houston 944.42 Delivered 17
+Related Information
+ORDER BY Clause [page 30]
+1.3.12FLATTEN Operator
+Flattens a table so that each event attribute becomes a top-level row. Case attributes are repeated accordingly.
+Caution
+For very large data sets, this operator may require excessive CPU activity, causing long query execution times.
+For more information, refer to Performance [page 291].
+The following example shows a typical table before being flattened:
+case_id Customer IDStatus City Events 1001 2001 delivered New York
+event_na
+me end_time
+ 
+Receive
+2024-05-
+customer
+01T09:30
+order
+:00
+Receive
+2024-05-
+payment
+02T09:4
+
+5:00
+Ship
+2024-05-
+goods
+07T11:20:
+
+00
+1002 2002 canceled Boston
+event_na
+me end_time
+ 
+Receive customer order
+2024-05- 02T14:00 :00
+Cancel order
+2024-05- 03T09:0 0:00
+The same table after being flattened:
+case_id Customer IDStatus City event_nameend_time 1001 2001 delivered New York Receive customer 2024-05-01T09:3
+order 0:00
+1001 2001 delivered New York Receive payment 2024-05-02T09:4
+5:00
+1001 2001 delivered New York Ship goods 2024-05-07T11:20
+:00
+case_id Customer IDStatus City event_nameend_time
+ 
+1002
+2002
+canceled
+Boston
+Receive customer order
+2024-05-02T14:0 0:00
+1002
+2002
+canceled
+Boston
+Cancel order
+2024-05-03T09:0 0:00
+The flattened table allows aggregations based on event names or other event attributes.
+Remember
+Don't combine the FLATTEN operator with the MATCHES operators. The MATCHES operators work only with nested tables and not with flattened tables.
+Syntax
+FLATTEN(<tableName>)
+Example 1
+Assume the following process data (THIS_PROCESS):
+case_id event_name 00002 Receive Customer Order
+Receive Payment
+Send items to Printing Order Canceled
+00013 Receive Customer Order
+Ship Goods Express
+Receive Payment
+Receive Delivery Confirmation
+00016 Receive Customer Order
+Receive Payment
+Ship Goods Express
+Receive Delivery Confirmation
+case_id event_name 00019 Receive Customer Order
+Receive Payment
+Ship Goods Express
+Receive Delivery Confirmation
+00020 Receive Customer Order
+Receive Payment
+Ship Goods Standard
+Receive Delivery Confirmation
+This query flattens the result set.
+SELECT case_id, event_name FROM FLATTEN (THIS_PROCESS)
+Partial output (rows including case IDs 00019 and 00020 not shown):
+case_id event_name 00002 Receive Customer Order 00002 Receive Payment
+00002 Send items to Printing
+00002 Order Canceled
+00013 Receive Customer Order 00013 Ship Goods Express
+00013 Receive Payment
+00013 Receive Delivery Confirmation 00016 Receive Customer Order 00016 Receive Payment
+00016 Ship Goods Express
+00016 Receive Delivery Confirmation
+Example 2
+Assuming the same process data as the previous example, the following query counts the number of cases in which each event occurs. By counting distinct case IDs, repeated events within a single case aren’t counted.
+SELECT COUNT (DISTINCT case_id), "event_name" FROM FLATTEN (THIS_PROCESS)
+GROUP BY 2
+Output:
+event_name COUNT_DISTINCT(case_id) Ship Goods Express 3
+Order Canceled 1
+Receive Customer Order 5
+Send items to Printing 1
+Ship Goods Standard 1
+Receive Delivery Confirmation 4
+Receive Payment 5
+Related Information
+FILTER EVENTS Clause [page 22] Matching Expressions [page 80]
+1.3.13UNION ALL Clause
+Combines the result sets of two or more SELECT statements.
+The number of table columns and column data types must match for each SELECT statement.
+Syntax
+<selectStatement> UNION ALL <selectStatement>
+SELECT statements before and after UNION ALL can only have the following clauses:
+    • SELECT
+    • FROM
+    • TABLESAMPLE
+    • WHERE
+    • GROUP BY
+Other clauses, for example the ORDER BY, LIMIT, and OFFSET can only be applied to the result of UNION ALL.
+Example 1
+SELECT case_id AS "Case ID" FROM
+(
+    SELECT case_id
+    FROM THIS_PROCESS
+    UNION ALL
+    SELECT case_id
+    FROM THIS_PROCESS
+) as sub
+ORDER BY 1
+LIMIT 20
+This query returns a combined result set of the case_id values from tables in a column.
+Case ID 00001 00001 00002 00002 00003 00003 00004 00004
+Example 2
+SELECT case_id, ts, is_first
+FROM
+(
+    SELECT
+        case_id,
+        DATE_TRUNC('day', (SELECT FIRST(end_time))) AS ts,
+1.0 AS is_first
+    FROM THIS_PROCESS
+    UNION ALL
+    SELECT
+        case_id,
+        DATE_TRUNC('day', (SELECT LAST(end_time)) + DURATION '1day') AS ts,
+0.0 as is_first
+    FROM THIS_PROCESS
+) AS sub
+ORDER BY 1, 2, 3
+LIMIT 20
+This query returns a combined result set of dates where an event was either open or closed on the given date. A timestamp (ts) is used, where 1 means the event is open and 0 means the event is closed on the respective dates.
+case_id ts is_first 00001 08/01/2020 1 00001 08/10/2020 0 00002 04/06/2020 1 00002 04/10/2020 0 00003 21/02/2020 1 00003 03/03/2020 0 00004 10/09/2020 1 00004 17/10/2020 0
+    1.4 Subqueries
+A subquery is a query that is nested inside another query.
+There are two types of subquery: general and event-level. They differ based on the level at which they operate, and what types of data they return.
+    • General subqueries operate at case level and return tables.
+    • Event-level subqueries operate at event level and return scalar values.
+They follow this general syntax:
+SELECT (<eventLevelSubquery>) [, <columns> ...] FROM (<generalSubquery>) AS <alias>
+WHERE <expression> (<eventLevelSubquery>)
+Related Information
+Event-Level Subqueries [page 52] General Subqueries [page 50]
+

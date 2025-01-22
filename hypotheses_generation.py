@@ -34,6 +34,41 @@ def generate_query(hypothesis):
     return query   
 
 
+def generate_query_SIGNAL_new(hypothesis):
+    # 1. Provide context for what to do
+    sysgen1 = "You are conducting statistical hypothesis testing as part of Process Mining. You have the following hypothesis: "
+    sys_message_gen = f"{sysgen1}{hypothesis}"
+    # 2. Provide the exemplary select query that contains all available rows in the event log.
+    sysgen2 = "You are going to generate an SIGNAL query to work on my event log database. I will provide you with an exemplary SIGNAL statement that explicitly states all rows available so you know how to build the query: "
+    signal_eventlog_query="SELECT case_id, event_name, end_time, Activity, Resource, elementId, \"lifecycle:transition\", \"org:resource\", resourceCost, resourceId FROM \"defaultview-4\" LIMIT 1"
+    sys_message_gen = f"{sys_message_gen}{sysgen2}{signal_eventlog_query}"
+    # 3. Provide an exemplary result of the event log.
+    sysgen3 = "The query returns the following result. This will show you the data that is contained in each column, and its format: "
+    event_log_exc = signalq.query_signal(signal_eventlog_query)
+    sys_message_gen = f"{sys_message_gen}{sysgen3}{event_log_exc}"
+    
+    sysgen4 = "Next, you receive an extensive documentation of the SIGNAL processing language, and its operators. Follow this to build the query: "
+    with open("./SIGNAL_documentation.txt", "r") as file:
+        documentation = file.read()
+    sys_message_gen = f"{sys_message_gen}{sysgen4}{documentation}"
+
+    with open("./system_messages/hypothesis_generation.txt", "a") as file:
+        file.write(sys_message_gen)
+        
+    usergen = "Transform this hypothesis into a valid SIGNAL query to execute on our database given its column names, content, and structure. Make sure your query follows valid SQL syntax. Just return the generated query, and nothing else. Your result must be directly executable."    
+    sys_message_user = usergen
+    app.query("I want to generate a SIGNAL query from the hypothesis.")
+    #print(sys_message_gen)
+
+    query = llm_query(sys_message_gen, sys_message_user)
+    query = query['answer']
+    query = query.strip()
+    app.response("This is the generated SIGNAL query: " + query)
+    with open("./hypothesis_query.txt", "a") as file:
+       file.write(query)
+    
+    return query   
+
 
 
 def generate_query_SIGNAL(hypothesis):
@@ -61,10 +96,10 @@ def generate_query_SIGNAL(hypothesis):
     sys_message_gen = f"{sys_message_gen}{sysgen6}{sysgen7}"
     # 6. Provide 8 positive query examples from the metrics_definitions library.
     sysgen8 = "To help you generate, here are some example queries that are valid in the SIGNAL process language: "
-    
     with open("./example_queries.json", "r") as file:
         queries = json.load(file)
     sys_message_gen = f"{sys_message_gen}{sysgen8}{queries}"
+    
     with open("./system_messages/hypothesis_generation.txt", "a") as file:
         file.write(sys_message_gen)
         

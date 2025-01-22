@@ -5,22 +5,22 @@
             "index": 0,
             "logprobs": null,
             "message": {
-                "content": "```sql\nSELECT COUNT(case_id)\nFROM FLATTEN(\"defaultview-4\")\nWHERE event_name MATCHES ('Review request' -> 'ParallelGateway')\n```",
+                "content": "Here are three hypothesis ideas in natural language:\n\n1.  \"The event 'Prepare Contract' is always preceded by the event 'Review Request'.\"\n\n    This hypothesis checks the directly-follows relation between two events. It can be used to verify if the process is executed as planned.\n\n2.  \"The event 'Send Quote' always follows the event 'Assess Risks'.\"\n\n    This hypothesis also checks the directly-follows relation between two events. It can be used to check if the process is being executed according to the model.\n\n3.  \"The event 'Prepare Special Terms' never directly follows the event 'Prepare Contract'.\"\n\n    This hypothesis checks if there is a specific directly-follows relation between two events that is not allowed according to the process model.\n\nThese hypotheses are simple and specific, making it easier to convert them into executable SQL queries.",
                 "role": "assistant",
                 "tool_calls": []
             },
             "stop_reason": null
         }
     ],
-    "created": 1737561963,
-    "id": "chatcmpl-5eeebfcdb1f640ec9284cd98d37df053",
+    "created": 1737563670,
+    "id": "chatcmpl-a4ca3c2f28894b1d9621d9242afd2c3c",
     "model": "meta--llama3.1-70b-instruct",
     "object": "chat.completion",
     "prompt_logprobs": null,
     "usage": {
-        "completion_tokens": 34,
-        "prompt_tokens": 2111,
+        "completion_tokens": 175,
+        "prompt_tokens": 2921,
         "prompt_tokens_details": null,
-        "total_tokens": 2145
+        "total_tokens": 3096
     }
 }

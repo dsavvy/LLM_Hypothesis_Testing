@@ -175,4 +175,18 @@ This hypothesis aims to verify if the 'Calculate terms' task is always followed 
 
 This hypothesis aims to verify if the 'Prepare special terms' task is always followed by a 'ParallelGateway' task in the process, as described in the process model.
 
-These hypotheses can be used as a starting point to create SQL queries to test the process and identify any deviations or areas for improvement.
+These hypotheses can be used as a starting point to create SQL queries to test the process and identify any deviations or areas for improvement.Based on the process model and event log data provided, here are three hypothesis ideas in natural language:
+
+1. "The event 'Review request' always directly follows the event 'Credit requested'."
+
+This hypothesis aims to verify that the process model's sequence flow from 'Credit requested' to 'Review request' is correctly reflected in the event log data.
+
+2. "The event 'Prepare contract' is always performed by 'Default Resource-000001' after the 'Exclusive_Databased_Gateway' decision."
+
+This hypothesis investigates whether the process model's assignment of the 'Prepare contract' task to 'Default Resource-000001' after the gateway decision is consistent with the event log data.
+
+3. "The event 'Send quote' always directly follows either the event 'Prepare contract' or the event 'Prepare special terms'."
+
+This hypothesis tests whether the process model's parallel gateway and sequence flows leading to the 'Send quote' event are correctly represented in the event log data.
+
+These hypotheses are designed to be simple and specific, making it easier to convert them into executable SQL queries to test the event log data.
