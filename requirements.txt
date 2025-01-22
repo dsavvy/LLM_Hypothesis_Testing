@@ -117,4 +117,4 @@ wcwidth==0.2.13
 wheel==0.44.0
 xmltodict==0.13.0
 yarl==1.13.1
-githttps://github.com/signavio/bpmn2constraints.git
+git+https://github.com/signavio/bpmn2constraints.git
