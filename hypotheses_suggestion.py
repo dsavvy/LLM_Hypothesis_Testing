@@ -69,7 +69,7 @@ def selectDirection():
 
 
 def suggestHypothesis(direction):
-    app.query (f"{"I want to "} {st.session_state["direction"]}")
+    app.query (f"{"I want to "} {direction}")
 
     # 1.2: Generate DFG graph - Textual Abstraction
     DFG_relation = GenTextualAbstraction()
@@ -89,7 +89,7 @@ def suggestHypothesis(direction):
         context = file.read()
     sys_message_gen = f"{sys_message_gen}{sysgenx}{context}{". "}"    
     sysgen3 = "Now, create three hypothesis in natural language based on the data provided. In Process Mining, we use hypothesis to test either test the quality of the data in the event log, check if the event log data conforms to our process model, or to find enhancements to the process. You will build hypothesis to test the following direction: "
-    sys_message_gen=f"{sys_message_gen}{sysgenlog2}{event_log_exc}{sysgen3}{". "}"
+    sys_message_gen=f"{sys_message_gen}{sysgenlog2}{event_log_exc}{sysgen3}{direction}{". "}"
     
     sysgen4 = "Try to make the hypotheses as simple and specific as possible so we can convert them into simple, directly executable SQL queries later."
     sys_message_gen = f"{sys_message_gen}{direction}{sysgen4}{". "}"
