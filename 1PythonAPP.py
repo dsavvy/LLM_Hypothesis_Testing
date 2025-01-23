@@ -81,7 +81,7 @@ def main():
                 file.write(f"{st.session_state.selected_hypothesis}\n{query}\n")
         
         if "SIGNAL_query" not in st.session_state:
-            SIGNAL_query = generate_query_SIGNAL(st.session_state.selected_hypothesis)
+            SIGNAL_query = generate_query_SIGNAL_new(st.session_state.selected_hypothesis)
             st.session_state.SIGNALquery = SIGNAL_query
             with open("./session_output.txt", "a") as file:
                 file.write(f"{st.session_state.selected_hypothesis}\n{SIGNAL_query}\n")
