@@ -2,7 +2,7 @@ import streamlit as st
 import Streamlit_build as app
 import signal_credentials as signal
 from hypotheses_suggestion import showProcess, suggestHypothesis, choose_hypothesis, selectDirection
-from hypotheses_generation import generate_query, generate_query_SIGNAL
+from hypotheses_generation import generate_query, generate_query_SIGNAL, generate_query_SIGNAL_new
 
 def main():
     # 0. Basic initialization
