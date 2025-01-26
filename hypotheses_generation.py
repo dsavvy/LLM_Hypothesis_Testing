@@ -13,7 +13,7 @@ def generate_query(hypothesis):
     sysgen2 = "Your task provided by the user message will be to transform this hypothesis into a valid SQL query. You will execute it on our database with the following column names: "
     signal_eventlog_query = 'SELECT CASE_ID, EVENT_NAME, END_TIME, Activity, Resource, elementId, '
     '"lifecycle:transition", "org:resource", resourceCost, resourceId '
-    'FROM "defaultview-4" LIMIT 1'
+    'FROM FLATTEN("defaultview-4") LIMIT 20'
     sys_message_gen=f"{sys_message_gen}{sysgen2}{signal_eventlog_query}"
     sysgen3 = "This data base request provided you with the correct column names. This is the result of the query from which you can determine the data types and formats in each column: "
     event_log_exc = signalq.query_signal(signal_eventlog_query)
