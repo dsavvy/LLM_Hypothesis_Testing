@@ -15,5 +15,6 @@ Signal_test_GPT.py
 pip install openai.py
 __pycache__/
 process_declare_constraints.txt
+signavio-credentials.txt
 
 
